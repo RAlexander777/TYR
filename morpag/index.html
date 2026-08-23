@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TYR: los códigos secretos de nuestro amor. Descúbrelos todos, mi amor." />
+  <meta name="theme-color" content="#1a1314" />
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+  <title>Códigos secretos · TYR</title>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">THANIA</div>
+      <div class="code">
+        <a id="codeBtn" href="#modal" role="button">Códigos</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="h-text">
+    <span id="greeting">Buenas noches mi amor</span>
+    <h1 id="phrase">Regresa Pronto</h1>
+    <br />
+    <a id="refreshBtn" href="#" aria-label="Cambiar frase y lanzar emojis">
+      <span id="emoji" aria-hidden="true">✨</span>
+    </a>
+  </section>
+
+  <div id="emojiContainer" class="emoji-container" aria-hidden="true"></div>
+
+  <!-- Modal de códigos -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <span id="closeBtn" class="close-btn" role="button" aria-label="Cerrar">×</span>
+      <form id="modalForm">
+        <h2 id="modalTitle">Coloca un código</h2>
+        <input id="modalInput" type="text" autocomplete="off" aria-label="Código secreto" />
+        <button id="submitBtn" type="submit">OKI</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Corazón neon -->
+  <div id="overlay">
+    <canvas id="canvas" width="1400" height="600" aria-hidden="true"></canvas>
+    <button id="backButton" aria-label="Cerrar animación">✕</button>
+    <div class="text-box">
+      <h1>Te Amo</h1>
+    </div>
+  </div>
+
+  <!-- Galería 3D -->
+  <div id="gallery-modal" class="gallery-modal" role="dialog" aria-modal="true" aria-label="Galería de recuerdos">
+    <div id="gallery" class="gallery">
+      <div class="box">
+        <span style="--i: 1"><img src="./assets/images/img1.webp" alt="Recuerdo 1" /></span>
+        <span style="--i: 2"><img src="./assets/images/img2.webp" alt="Recuerdo 2" /></span>
+        <span style="--i: 3"><img src="./assets/images/img3.webp" alt="Recuerdo 3" /></span>
+        <span style="--i: 4"><img src="./assets/images/img4.webp" alt="Recuerdo 4" /></span>
+        <span style="--i: 5"><img src="./assets/images/img5.webp" alt="Recuerdo 5" /></span>
+        <span style="--i: 6"><img src="./assets/images/img6.webp" alt="Recuerdo 6" /></span>
+        <span style="--i: 7"><img src="./assets/images/img7.webp" alt="Recuerdo 7" /></span>
+        <span style="--i: 8"><img src="./assets/images/img8.webp" alt="Recuerdo 8" /></span>
+      </div>
+      <div class="btns">
+        <span class="btn prev" role="button" aria-label="Rotar a la izquierda"></span>
+        <span class="btn next" role="button" aria-label="Rotar a la derecha"></span>
+      </div>
+    </div>
+    <button id="backButton2" aria-label="Cerrar galería">✕</button>
+  </div>
+
+  <!-- Carta -->
+  <div id="letter-modal" class="letter-modal" role="dialog" aria-modal="true" aria-label="Carta">
+    <div class="envelope-wrapper flap">
+      <div class="envelope">
+        <div class="letter">
+          <div class="text">
+            <strong>Para Thania.</strong>
+            <p>Desde que te vi por primera vez, no saliste de mi mente. Desde que te besé por primera vez, no saliste de mi corazón. Quiero emprender este viaje llamado vida a tu lado, y estaré seguro que me equivoqué de vida si este viaje llega a su fin sin tí.</p>
+          </div>
+        </div>
+        <div class="heart2" aria-hidden="true"></div>
+      </div>
+    </div>
+    <button id="backButton3" aria-label="Cerrar carta">✕</button>
+  </div>
+
+  <!-- Pregunta -->
+  <div id="question-modal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="questionTitle">
+    <div class="question-gif">
+      <img id="questionGif" src="./assets/gifs/question1.gif" alt="Question GIF" />
+    </div>
+    <h1 id="questionTitle">¿Quieres Traka conmigo mi amor?</h1>
+    <div class="question-btn">
+      <a id="yesBtn" href="#" role="button">chiii!</a>
+      <a id="noBtn" href="#" role="button">nooo!</a>
+    </div>
+    <button id="backButton4" aria-label="Cerrar pregunta">✕</button>
+  </div>
+
+  <!-- Mapa -->
+  <div id="map-modal" class="map-modal" style="display:none" role="dialog" aria-modal="true" aria-label="Mapa de sentimientos">
+    <div class="map-container">
+      <div id="map">
+        <div class="image-container">
+          <img class="point" src="./assets/map_images/1.webp" alt="Punto 1" style="left: 11.7%; top: 6%" data-description="A veces me pregunto, cómo pude vivir casi toda mi vida sin tí, porque me duele esta soledad." />
+          <img class="point" src="./assets/map_images/2.webp" alt="Punto 2" style="left: 33.3%; top: 30%" data-description="Pero sé que tu partida no es para siempre, y que piensas en mí con cada respirar." />
+          <img class="point" src="./assets/map_images/3.webp" alt="Punto 3" style="left: 58.3%; top: 54%" data-description="Y aprendí a ser paciente, pues qué tal paciencia tuve, esperando que llegues a mi vida." />
+          <img class="point" src="./assets/map_images/4.webp" alt="Punto 4" style="left: 16.7%; top: 80%" data-description="Te sigo amando más que ayer, sobrepasando esta distancia, que pronto acabará." />
+          <img class="point" src="./assets/map_images/5.webp" alt="Punto 5" style="left: 83.3%; top: 80%" data-description="Será reemplazada con mis besos y caricias, y podré exclamar: Finalmente te vuelvo a tener en mis brazos, amor mío." />
+        </div>
+        <div id="image-description">
+          <div class="card">
+            <p id="description-text"></p>
+          </div>
+        </div>
+        <div id="tooltip"></div>
+      </div>
+    </div>
+    <button id="backButton5" aria-label="Cerrar mapa">✕</button>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

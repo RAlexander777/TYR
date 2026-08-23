@@ -1,0 +1,383 @@
+:root {
+  --bg-color: var(--color-bg);
+  --accent: var(--color-accent);
+  --text: var(--color-text);
+  --tile-gap: 2px;
+  --bg-image: url('assets/1.webp');
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text);
+  font-family: var(--font-body);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100dvh;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.game-wrapper {
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  padding: 20px;
+  padding-bottom: 80px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--accent);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  text-shadow: 0 0 15px rgba(209, 73, 91, 0.4);
+  margin-bottom: 0.25rem;
+}
+
+header p {
+  font-family: var(--font-body);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  opacity: 0.6;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.gallery {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.thumb {
+  width: 50px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 3px solid transparent;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0;
+  background: none;
+  transition: all var(--duration-base);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb.active {
+  border-color: var(--accent);
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: var(--shadow-glow);
+}
+
+#puzzle-container {
+  position: relative;
+  width: 90vw;
+  max-width: 350px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  background: #3e2c2c;
+  border: 8px solid #4a3b3b;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  touch-action: none;
+}
+
+.tile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(33.33% - var(--tile-gap));
+  height: calc(33.33% - var(--tile-gap));
+  background-image: var(--bg-image);
+  background-size: 300% 300%;
+  border-radius: 4px;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform var(--duration-base) cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.tile.dragging {
+  z-index: 100;
+  cursor: grabbing;
+  transition: none;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  transform: scale(1.05);
+}
+
+.shuffling .tile {
+  transition: transform 0.05s linear !important;
+}
+
+#bg-effects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-bg);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.heart-item {
+  position: absolute;
+  top: -50px;
+  width: 30px;
+  height: 30px;
+  color: rgba(209, 73, 91, 0.3);
+  animation: fall var(--fall-duration) linear infinite;
+}
+
+.heart-item svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+@keyframes fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(var(--rotation-tilt)) scale(var(--heart-scale));
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 110vh, 0) rotate(var(--rotation-tilt)) scale(var(--heart-scale));
+    opacity: 0;
+  }
+}
+
+/* ------- Escena del sobre ------- */
+
+#letter-scene {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 10, 10, 0.95);
+  z-index: var(--z-overlay);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-slow);
+}
+
+#letter-scene.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.envelope-container {
+  position: relative;
+  width: min(320px, 82vw);
+  aspect-ratio: 320 / 220;
+  filter: drop-shadow(8px 8px 0 rgba(0, 0, 0, 0.2));
+  clip-path: inset(-300px -100px 0px -100px);
+}
+
+.envelope-base {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  background-color: #ffffff;
+  border: 4px solid #000;
+  z-index: 1;
+}
+
+.letter-card {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  right: 20px;
+  min-height: 180px;
+  background: #fff;
+  border: 4px solid #000;
+  padding: 20px;
+  box-sizing: border-box;
+  z-index: 2;
+  transform: translateY(120px);
+  transition: transform var(--duration-slow) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.letter-content h3 {
+  font-family: 'Courier New', monospace;
+  color: #d1495b;
+  margin: 0 0 10px 0;
+}
+
+.letter-content p {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #000;
+  font-weight: bold;
+}
+
+#letter-actions {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+#letter-actions button {
+  padding: 8px 15px;
+  font-size: 0.85rem;
+  border-radius: 15px;
+}
+
+button {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.secondary-btn {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.envelope-body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.envelope-body path,
+.envelope-flap path {
+  stroke: #000000;
+  stroke-width: 8px;
+  vector-effect: non-scaling-stroke;
+  transition: fill var(--duration-slow) ease;
+}
+
+.envelope-flap-container {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(100% - 8px);
+  height: 115px;
+  z-index: 20;
+  transform-origin: top;
+  transition: transform var(--duration-slow) cubic-bezier(0.4, 0, 0.2, 1), z-index var(--duration-slow);
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+.envelope-flap {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.envelope-flap-container.open {
+  transform: rotateX(180deg);
+  z-index: 1;
+}
+
+.envelope-flap-container.open ~ .letter-card {
+  transform: translateY(40px);
+}
+
+.sticker {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 48px;
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 1h3v1h2V1h3v1h1v1h1v3h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1H7v-1H6v-1H5v-1H4v-1H3V7H2V6H1V3h1V2h1V1h1z' fill='%23000'/%3E%3Cpath d='M4 2h3v1h2V2h3v1h1v3h-1v1h-1v1h-1v1h-1v1h-1v1H7v-1H6v-1H5v-1H4v-1H3V3h1V2z' fill='%23d1495b'/%3E%3Cpath d='M4 3h2v1H4V3z' fill='%23fff' opacity='0.7'/%3E%3C/svg%3E");
+  image-rendering: pixelated;
+  background-size: contain;
+  background-repeat: no-repeat;
+  z-index: 30;
+  transition: transform var(--duration-fast) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.2));
+}
+
+.sticker:hover {
+  transform: translateX(-50%) scale(1.1) rotate(5deg);
+}
+
+.sticker.removed {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) scale(1.5) rotate(20deg);
+  transition: all var(--duration-base) ease-in;
+}
+
+.letter-card.pulled {
+  transform: translateY(-160px) !important;
+  z-index: 40;
+}
+
+/* Corazones que salen del sobre */
+.floating-heart {
+  position: absolute;
+  font-size: 20px;
+  z-index: 50;
+  pointer-events: none;
+  animation: heart-burst 2s ease-out forwards;
+}
+
+@keyframes heart-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.6);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--float-x, 0px), -120px) scale(1.4);
+  }
+}
+
+@media (max-width: 420px) {
+  .letter-card {
+    min-height: 150px;
+    padding: 14px;
+  }
+  .letter-card.pulled {
+    transform: translateY(-140px) !important;
+  }
+  .thumb {
+    width: 44px;
+    height: 54px;
+  }
+}

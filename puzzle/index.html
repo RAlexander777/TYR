@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Elige un recuerdo y ármalo. Un puzzle para ti.">
+  <meta name="theme-color" content="#1a1314">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <title>Nuestro puzzle · TYR</title>
+</head>
+
+<body>
+  <div id="bg-effects"></div>
+
+  <div class="game-wrapper">
+    <header>
+      <h1>Feliz San Valentín</h1>
+      <p>Elige un recuerdo y ármalo</p>
+    </header>
+
+    <div class="gallery" id="gallery" aria-label="Galería de fotos">
+      <button class="thumb active" type="button" aria-label="Foto 1">
+        <img src="assets/1.webp" alt="Foto 1" loading="lazy">
+      </button>
+      <button class="thumb" type="button" aria-label="Foto 2">
+        <img src="assets/2.webp" alt="Foto 2" loading="lazy">
+      </button>
+      <button class="thumb" type="button" aria-label="Foto 3">
+        <img src="assets/3.webp" alt="Foto 3" loading="lazy">
+      </button>
+      <button class="thumb" type="button" aria-label="Foto 4">
+        <img src="assets/4.webp" alt="Foto 4" loading="lazy">
+      </button>
+    </div>
+
+    <div id="puzzle-container" role="application" aria-label="Rompecabezas"></div>
+  </div>
+
+  <div id="letter-scene" class="hidden">
+    <div class="envelope-container">
+      <div class="envelope-base"></div>
+
+      <div class="letter-card" id="final-letter">
+        <div class="letter-content">
+          <h3>Para ti ❤️</h3>
+          <p id="letter-text">Eres mi Player 1 en este juego llamado vida.</p>
+
+          <div id="letter-actions" class="hidden">
+            <button id="btn-restart" type="button">Armar de nuevo</button>
+            <button id="btn-next" type="button" class="secondary-btn">Siguiente imagen</button>
+          </div>
+        </div>
+      </div>
+
+      <svg class="envelope-body" viewBox="0 0 320 220" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,0 L160,115 L320,0 L320,220 L0,220 Z" />
+      </svg>
+
+      <div class="envelope-flap-container" id="flap-container">
+        <svg class="envelope-flap" viewBox="0 0 320 115" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0,0 L320,0 L160,115 Z" />
+        </svg>
+        <div class="sticker" id="sticker"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+
+</html>
