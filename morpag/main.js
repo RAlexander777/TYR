@@ -259,18 +259,105 @@ const descriptionText = document.querySelector('#description-text');
 
 function showMap() {
   mapModal.style.display = 'flex';
+  resetMap();
 }
 
 backButton5.addEventListener('click', () => {
   mapModal.style.display = 'none';
 });
 
+const mapView = document.querySelector('#map');
+const mapReset = document.querySelector('#mapReset');
+
+let mapZoom = 1;
+let mapPanX = 0;
+let mapPanY = 0;
+let isPanning = false;
+let panStartX = 0;
+let panStartY = 0;
+
+function applyMapTransform() {
+  imageContainer.style.transform = `translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom})`;
+}
+
+function resetMap() {
+  mapZoom = 1;
+  mapPanX = 0;
+  mapPanY = 0;
+  applyMapTransform();
+  descriptionContainer.style.display = 'none';
+}
+
+function clampPan() {
+  const rect = mapView.getBoundingClientRect();
+  const maxX = (rect.width * (mapZoom - 1)) / 2;
+  const maxY = (rect.height * (mapZoom - 1)) / 2;
+  mapPanX = Math.max(-maxX, Math.min(maxX, mapPanX));
+  mapPanY = Math.max(-maxY, Math.min(maxY, mapPanY));
+}
+
+mapView.addEventListener(
+  'wheel',
+  (event) => {
+    event.preventDefault();
+    const rect = mapView.getBoundingClientRect();
+    const originX = event.clientX - rect.left - rect.width / 2;
+    const originY = event.clientY - rect.top - rect.height / 2;
+    const factor = event.deltaY < 0 ? 1.15 : 1 / 1.15;
+    const nextZoom = Math.min(3, Math.max(1, mapZoom * factor));
+    const ratio = nextZoom / mapZoom;
+    mapPanX = originX - (originX - mapPanX) * ratio;
+    mapPanY = originY - (originY - mapPanY) * ratio;
+    mapZoom = nextZoom;
+    clampPan();
+    applyMapTransform();
+    descriptionContainer.style.display = 'none';
+  },
+  { passive: false }
+);
+
+mapView.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0) return;
+  isPanning = true;
+  panStartX = event.clientX - mapPanX;
+  panStartY = event.clientY - mapPanY;
+  mapView.classList.add('panning');
+  imageContainer.classList.add('panning');
+  mapView.setPointerCapture(event.pointerId);
+  descriptionContainer.style.display = 'none';
+});
+
+mapView.addEventListener('pointermove', (event) => {
+  if (!isPanning) return;
+  mapPanX = event.clientX - panStartX;
+  mapPanY = event.clientY - panStartY;
+  clampPan();
+  applyMapTransform();
+});
+
+function stopPanning(event) {
+  if (!isPanning) return;
+  isPanning = false;
+  mapView.classList.remove('panning');
+  imageContainer.classList.remove('panning');
+  try {
+    mapView.releasePointerCapture(event.pointerId);
+  } catch (error) {
+    // no-op: pointer capture may already be released
+  }
+}
+
+mapView.addEventListener('pointerup', stopPanning);
+mapView.addEventListener('pointercancel', stopPanning);
+
+mapReset.addEventListener('click', resetMap);
+
 points.forEach((point) => {
   point.addEventListener('click', () => {
     const rect = point.getBoundingClientRect();
-    const parentRect = imageContainer.getBoundingClientRect();
-    const top = rect.bottom - parentRect.top;
-    const left = rect.left - parentRect.left + rect.width / 2;
+    const viewRect = mapView.getBoundingClientRect();
+    const top = rect.bottom - viewRect.top;
+    const left = rect.left - viewRect.left + rect.width / 2;
 
     descriptionText.textContent = point.dataset.description;
     descriptionContainer.style.top = `${top}px`;
