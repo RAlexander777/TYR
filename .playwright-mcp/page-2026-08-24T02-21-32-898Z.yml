@@ -1,0 +1,27 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - link "Volver a la suite TYR" [ref=e4] [cursor=pointer]:
+        - /url: ../index.html
+        - text: ⌂ Suite
+      - heading "Feliz San Valentín" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Elige un recuerdo y ármalo
+    - generic "Galería de fotos" [ref=e7]:
+      - button "Foto 1" [ref=e8] [cursor=pointer]:
+        - img "Foto 1" [ref=e9]
+      - button "Foto 2" [ref=e10] [cursor=pointer]:
+        - img "Foto 2" [ref=e11]
+      - button "Foto 3" [ref=e12] [cursor=pointer]:
+        - img "Foto 3" [ref=e13]
+      - button "Foto 4" [ref=e14] [cursor=pointer]:
+        - img "Foto 4" [ref=e15]
+    - application "Rompecabezas" [ref=e16]
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - heading "Para ti ❤️" [level=3]
+          - paragraph: Eres mi complemento, la pieza del rompecabezas que encaja justo en mi corazón.
+          - generic:
+            - button "Armar de nuevo"
+            - button "Siguiente imagen"

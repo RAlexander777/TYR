@@ -1,0 +1,41 @@
+- generic [active] [ref=f2e1]:
+  - link "Volver a la suite TYR" [ref=f2e2] [cursor=pointer]:
+    - /url: ../index.html
+    - text: ⌂ Suite
+  - region "Introducción" [ref=f2e3]:
+    - paragraph [ref=f2e6]: Érase una vez... un astronauta solitario que vagaba por el espacio, sin rumbo, explorando lo desconocido.
+  - region "La oscuridad" [ref=f2e7]:
+    - paragraph [ref=f2e10]: No tenia idea de lo que había en la basta oscuridad, pero aún así avanzaba, sin objetivo.
+  - generic [ref=f2e11]:
+    - img "Un agujero negro se abre frente al astronauta" [ref=f2e12]
+    - generic [ref=f2e13]:
+      - heading "Pero de repente..." [level=2] [ref=f2e14]
+      - paragraph [ref=f2e15]: Se abrió un agujero negro frente a él. Se dice que los agujeros negros son puertas a otros universos, o planos dimensionales.
+  - generic [ref=f2e16]:
+    - img "Una astronauta emerge del agujero negro" [ref=f2e17]
+    - generic [ref=f2e18]:
+      - heading "Del agujero negro apareció, una astronauta.." [level=2] [ref=f2e19]
+      - paragraph [ref=f2e20]: Que, a la vista del astronauta, era alguien etérea, fuera de todo lo conocido y por conocer.
+  - generic [ref=f2e21]:
+    - img "Los dos astronautas flotan juntos en el espacio" [ref=f2e22]
+    - generic [ref=f2e23]:
+      - heading "Fue una conexión instantánea, se enamoraron perdidamente." [level=2] [ref=f2e24]
+      - paragraph [ref=f2e25]: El astronauta se entregó completamente a ese ser etéreo, deslumbrante, perfecto a sus ojos. El amor nació como nace una estrella en el universo.
+  - region "A través de los universos" [ref=f2e26]:
+    - generic [ref=f2e28]:
+      - generic [ref=f2e29]:
+        - img "Los astronautas se toman de la mano en el espacio" [ref=f2e30]
+        - paragraph [ref=f2e31]: Y decidieron compartir sus vidas, su viaje hacia lo desconocido.
+      - generic [ref=f2e32]:
+        - img "Los astronautas abrazados frente a una nebulosa" [ref=f2e33]
+        - paragraph [ref=f2e34]: En todo momento, en todo lugar, en todos los planos, en todo lo atemporal.
+      - generic [ref=f2e35]:
+        - img "Los astronautas juntos mirando las estrellas" [ref=f2e36]
+        - paragraph [ref=f2e37]: Porque su amor no pertenece a un solo universo, sino a todos los universos y planos existentes y por existir.
+      - generic [ref=f2e38]:
+        - img "Los astronautas frente a una galaxia brillante" [ref=f2e39]
+        - paragraph [ref=f2e40]: Que durará lo que dure la eternidad, y se volverán a encontrar, en cada universo y en cada plano de la existencia.
+  - region "Tiempo juntos" [ref=f2e41]:
+    - generic [ref=f2e42]:
+      - heading "El tiempo se detuvo hace..." [level=2] [ref=f2e43]
+      - timer [ref=f2e44]: 1449 días, 21 horas, 22 minutos y 31 segundos 💕

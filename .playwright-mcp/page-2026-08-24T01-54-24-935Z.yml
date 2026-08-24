@@ -1,0 +1,62 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - link "Volver a la suite TYR" [ref=f1e3] [cursor=pointer]:
+      - /url: ../index.html
+      - text: ⌂ Suite
+    - heading "Feliz Cumpleaños, Mi Amor" [level=1] [ref=f1e4]
+    - paragraph [ref=f1e5]: Espero poder pasar muchísimos más años a tu lado.
+  - main "Golden tickets" [ref=f1e6]:
+    - generic [ref=f1e7]:
+      - generic [ref=f1e8]:
+        - generic [ref=f1e10]:
+          - generic [ref=f1e11]: 🍽️
+          - generic [ref=f1e12]: "Ticket #01"
+        - generic [ref=f1e14]:
+          - heading "Cena Romántica" [level=3] [ref=f1e15]
+          - paragraph [ref=f1e16]: El lugar que quieras
+      - 'generic "Rasca el ticket 1: Cena Romántica" [ref=f1e17]'
+    - generic [ref=f1e18]:
+      - generic [ref=f1e19]:
+        - generic [ref=f1e21]:
+          - generic [ref=f1e22]: 🎬
+          - generic [ref=f1e23]: "Ticket #02"
+        - generic [ref=f1e25]:
+          - heading "Salida al Cine" [level=3] [ref=f1e26]
+          - paragraph [ref=f1e27]: La película que quieras
+      - 'generic "Rasca el ticket 2: Salida al Cine" [ref=f1e28]'
+    - generic [ref=f1e29]:
+      - generic [ref=f1e30]:
+        - generic [ref=f1e32]:
+          - generic [ref=f1e33]: 💆‍♀️
+          - generic [ref=f1e34]: "Ticket #03"
+        - generic [ref=f1e36]:
+          - heading "Día de Spa" [level=3] [ref=f1e37]
+          - paragraph [ref=f1e38]: Masajes hechos por mí
+      - 'generic "Rasca el ticket 3: Día de Spa" [ref=f1e39]'
+    - generic [ref=f1e40]:
+      - generic [ref=f1e41]:
+        - generic [ref=f1e43]:
+          - generic [ref=f1e44]: 🍦
+          - generic [ref=f1e45]: "Ticket #04"
+        - generic [ref=f1e47]:
+          - heading "Antojo" [level=3] [ref=f1e48]
+          - paragraph [ref=f1e49]: Cumplo un antojo al instante
+      - 'generic "Rasca el ticket 4: Antojo" [ref=f1e50]'
+    - generic [ref=f1e51]:
+      - generic [ref=f1e52]:
+        - generic [ref=f1e54]:
+          - generic [ref=f1e55]: 🃏
+          - generic [ref=f1e56]: "Ticket #05"
+        - generic [ref=f1e58]:
+          - heading "Libre" [level=3] [ref=f1e59]
+          - paragraph [ref=f1e60]: Pide lo que quieras
+      - 'generic "Rasca el ticket 5: Libre" [ref=f1e61]'
+    - generic [ref=f1e62]:
+      - generic [ref=f1e63]:
+        - generic [ref=f1e65]:
+          - generic [ref=f1e66]: ❤️
+          - generic [ref=f1e67]: "Ticket #06"
+        - generic [ref=f1e69]:
+          - heading "Beso Infinito" [level=3] [ref=f1e70]
+          - paragraph [ref=f1e71]: Ahora mismo
+      - 'generic "Rasca el ticket 6: Beso Infinito" [ref=f1e72]'

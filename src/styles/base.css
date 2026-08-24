@@ -43,35 +43,36 @@ a {
   color: inherit;
 }
 
-.suite-link {
+.suite-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-pill);
-  color: var(--color-accent);
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(237, 220, 210, 0.35);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--color-text);
+  font-size: 1.15rem;
+  line-height: 1;
   text-decoration: none;
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: var(--space-4);
-  transition: background var(--duration-fast), color var(--duration-fast);
+  transition:
+    background var(--duration-fast),
+    color var(--duration-fast),
+    transform var(--duration-fast);
 }
 
-.suite-link:hover {
+.suite-btn:hover {
   background: var(--color-accent);
   color: var(--color-white);
+  transform: translateY(-2px);
 }
 
-.suite-link--fixed {
+.suite-btn--corner {
   position: fixed;
   top: var(--space-4);
-  left: 50%;
-  transform: translateX(-50%);
+  right: var(--space-4);
   z-index: var(--z-deco);
-  background: rgba(0, 0, 0, 0.55);
-  margin: 0;
 }
 
 .sr-only {
