@@ -43,6 +43,37 @@ a {
   color: inherit;
 }
 
+.suite-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+
+.suite-link:hover {
+  background: var(--color-accent);
+  color: var(--color-white);
+}
+
+.suite-link--fixed {
+  position: fixed;
+  top: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-deco);
+  background: rgba(0, 0, 0, 0.55);
+  margin: 0;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
