@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="El Prado Dorado: deslízate, despeja la maleza de girasoles y descubre el mensaje secreto.">
+  <meta name="theme-color" content="#18120b">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <title>El Prado Dorado · TYR</title>
+</head>
+<body>
+  <div class="girasol-app">
+    <!-- Header with Cosmic Back Button and Snake Skin Selector -->
+    <header class="girasol-header">
+      <div class="girasol-header__titles">
+        <span class="girasol-header__badge">Universo Secreto</span>
+        <h1 class="girasol-header__title">El Prado Dorado</h1>
+      </div>
+
+      <!-- Snake Skin Palette Selector -->
+      <div class="girasol-skins" id="snake-skin-picker" aria-label="Elegir color de serpiente">
+        <button class="girasol-skin-chip is-active" type="button" data-skin="coral" aria-label="Color Coral Rosado" title="Coral Rosado">
+          <span class="girasol-skin-chip__dot" style="background: linear-gradient(135deg, #fb7185, #be123c);"></span>
+        </button>
+        <button class="girasol-skin-chip" type="button" data-skin="emerald" aria-label="Color Esmeralda" title="Verde Esmeralda">
+          <span class="girasol-skin-chip__dot" style="background: linear-gradient(135deg, #34d399, #065f46);"></span>
+        </button>
+        <button class="girasol-skin-chip" type="button" data-skin="gold" aria-label="Color Dorado Ámbar" title="Dorado Ámbar">
+          <span class="girasol-skin-chip__dot" style="background: linear-gradient(135deg, #fbbf24, #92400e);"></span>
+        </button>
+        <button class="girasol-skin-chip" type="button" data-skin="lavender" aria-label="Color Amatista Lavanda" title="Amatista Lavanda">
+          <span class="girasol-skin-chip__dot" style="background: linear-gradient(135deg, #c084fc, #581c87);"></span>
+        </button>
+        <button class="girasol-skin-chip" type="button" data-skin="night" aria-label="Color Obsidiana Cósmica" title="Obsidiana Cósmica">
+          <span class="girasol-skin-chip__dot" style="background: linear-gradient(135deg, #38bdf8, #0f172a);"></span>
+        </button>
+      </div>
+
+      <a class="cosmos-exit-btn cosmos-exit-btn--right" href="../index.html" aria-label="Volver al cosmos" title="Volver al cosmos" data-planet="girasol"></a>
+    </header>
+
+    <!-- Game HUD -->
+    <div class="girasol-hud" aria-label="Estado del juego">
+      <div class="girasol-hud__bar-wrap">
+        <div class="girasol-hud__labels">
+          <span class="girasol-hud__label">
+            <span class="girasol-hud__icon">🌻</span>
+            Maleza despejada
+          </span>
+          <span class="girasol-hud__percent" id="hud-percent">0%</span>
+        </div>
+        <div class="girasol-hud__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hud-progressbar">
+          <div class="girasol-hud__fill" id="hud-fill"></div>
+        </div>
+      </div>
+      <div class="girasol-hud__counter" id="hud-counter">
+        Cosechando: 0 / 0
+      </div>
+    </div>
+
+    <!-- WebGL Canvas Container -->
+    <main class="girasol-stage" id="girasol-stage" tabindex="0" aria-label="Prado 3D interactivo"></main>
+
+    <!-- Mobile Boost Turbo Button -->
+    <button class="girasol-boost-btn" id="mobile-boost-btn" type="button" aria-label="Acelerar serpiente">
+      <span class="girasol-boost-btn__icon">⚡</span>
+      <span class="girasol-boost-btn__label">TURBO</span>
+    </button>
+
+    <!-- Virtual Touch Joystick Anchor (for mobile) -->
+    <div class="girasol-joystick" id="touch-joystick" aria-hidden="true">
+      <div class="girasol-joystick__base">
+        <div class="girasol-joystick__knob"></div>
+      </div>
+    </div>
+
+    <!-- Secret Love Letter Modal (Appears upon clearing the grass) -->
+    <div class="secret-modal" id="secret-modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="secret-modal__backdrop"></div>
+      <div class="secret-modal__card">
+        <div class="secret-modal__sunflower-deco secret-modal__sunflower-deco--tl" aria-hidden="true">🌻</div>
+        <div class="secret-modal__sunflower-deco secret-modal__sunflower-deco--tr" aria-hidden="true">🌻</div>
+        <div class="secret-modal__sunflower-deco secret-modal__sunflower-deco--bl" aria-hidden="true">🌻</div>
+        <div class="secret-modal__sunflower-deco secret-modal__sunflower-deco--br" aria-hidden="true">🌻</div>
+
+        <button class="secret-modal__close" id="secret-close" type="button" aria-label="Cerrar mensaje">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <span class="secret-modal__tag">El secreto del prado</span>
+        <h2 class="secret-modal__title" id="secret-title"></h2>
+
+        <div class="secret-modal__divider" aria-hidden="true">
+          <span>✦</span><span>🌻</span><span>✦</span>
+        </div>
+
+        <div class="secret-modal__body" id="secret-body">
+          <!-- Lines injected by main.js -->
+        </div>
+
+        <div class="secret-modal__signature" id="secret-sig"></div>
+
+        <div class="secret-modal__actions">
+          <button class="secret-modal__btn secret-modal__btn--explore" id="secret-btn-continue" type="button">
+            <span>Seguir en el prado</span>
+          </button>
+          <a class="secret-modal__btn secret-modal__btn--cosmos" href="../index.html">
+            <span>Volver al cosmos</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
