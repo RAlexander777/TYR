@@ -1172,6 +1172,15 @@ class SlitherMeadowGame {
 
 function initGame() {
   new SlitherMeadowGame();
+
+  // Header cosmos exit button
+  initSpaceExit({ planetId: 'girasol' });
+
+  // Modal "Volver al cosmos" button
+  const modalCosmosBtn = document.querySelector('.secret-modal__btn--cosmos');
+  if (modalCosmosBtn) {
+    initSpaceExit({ planetId: 'girasol', customButton: modalCosmosBtn });
+  }
 }
 
 if (document.readyState === 'loading') {
