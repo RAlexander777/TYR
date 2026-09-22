@@ -1,0 +1,91 @@
+/**
+ * ship-ui.css
+ * Overlay chrome for the constellation's ship: the floating name tag that also serves
+ * as its tap target, and the way back out of the cockpit view.
+ */
+
+.ship-label {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.34rem 0.72rem 0.34rem 0.62rem;
+  border: 1px solid rgba(255, 204, 213, 0.4);
+  border-radius: 999px;
+  background: rgba(24, 17, 19, 0.74);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #ffe6ee;
+  font-family: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  will-change: transform;
+  /* Transform is rewritten every frame, so it must stay out of this list. */
+  transition: border-color 0.25s ease-out, background 0.25s ease-out;
+}
+
+.ship-label[hidden] {
+  display: none;
+}
+
+.ship-label:hover,
+.ship-label:focus-visible {
+  border-color: rgba(255, 204, 213, 0.9);
+  background: rgba(38, 24, 29, 0.86);
+  outline: none;
+}
+
+.ship-label__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffd9e6;
+  box-shadow: 0 0 8px rgba(255, 217, 230, 0.85);
+}
+
+.ship-cockpit-exit {
+  position: fixed;
+  left: 50%;
+  bottom: 1.6rem;
+  z-index: 1100;
+  transform: translateX(-50%);
+  padding: 0.62rem 1.35rem;
+  border: 1px solid rgba(255, 204, 213, 0.5);
+  border-radius: 999px;
+  background: rgba(24, 17, 19, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffe6ee;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.25s ease-out, background 0.25s ease-out;
+}
+
+.ship-cockpit-exit[hidden] {
+  display: none;
+}
+
+.ship-cockpit-exit:hover,
+.ship-cockpit-exit:focus-visible {
+  border-color: rgba(255, 204, 213, 0.9);
+  background: rgba(40, 26, 30, 0.9);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ship-label,
+  .ship-cockpit-exit {
+    transition: none;
+  }
+}

@@ -10,6 +10,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   box-sizing: border-box;
 }
 
@@ -155,7 +156,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: pan-y;
+  /* Own every gesture: `pan-y` handed vertical drags to the browser, which both
+     cancelled the camera tilt and triggered Chrome's pull-to-refresh. */
+  touch-action: none;
   cursor: grab;
   outline: none;
 }
@@ -253,7 +256,11 @@
   gap: 20px;
   pointer-events: auto;
   transform: translateY(30px) scale(0.96);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+  /* No spring here on purpose: the old cubic-bezier(0.34, 1.56, 0.64, 1) overshot, and
+     because the close button sits far from the card's centre it amplified every scale
+     change — it travelled 20px then snapped 2px back. This is the project's standard
+     entrance ease, which settles instead of bouncing. */
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.4s ease-out;
 }
 
@@ -456,8 +463,9 @@
 
   .solar-system__stage {
     width: 100%;
-    height: clamp(300px, 50vh, 420px);
-    max-height: 54vh;
+    flex: 1 1 auto;
+    height: auto;
+    max-height: none;
   }
 
   .planet-preview {
@@ -513,8 +521,14 @@
     font-size: 1.5rem;
   }
 
+  .solar-system {
+    padding-bottom: 68px; /* keep the constellation clear of the fixed mini player */
+  }
+
   .solar-system__stage {
-    height: clamp(200px, 62vh, 270px);
+    flex: 1 1 auto;
+    height: auto;
+    max-height: none;
   }
 
   .hub__footer {
@@ -554,6 +568,21 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(8px);
+}
+
+.hub__credits {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72em;
+  line-height: 1.5;
+  opacity: 0.7;
+}
+
+.hub__credits a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
 }
 
 @media (max-width: 640px) {

@@ -3,6 +3,7 @@ import '@fontsource/lato/300.css';
 import './src/styles/tokens.css';
 import './src/styles/base.css';
 import './src/styles/space-transition.css';
+import './src/styles/ship-ui.css';
 import './src/styles/lyrics-plus.css';
 import './src/styles/loader.css';
 import './style.css';

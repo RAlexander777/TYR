@@ -1,5 +1,20 @@
 import * as THREE from 'three';
 import { PLANETS } from './planets-data.js';
+import { PlanetaryShip, orbitRadiusFor, SHIP_LENGTH } from './lib/planetary-ship.js';
+import { GOLDEN_PLANET_DATA } from './golden-planet-model.js';
+import { PURPLE_PLANET_DATA } from './purple-planet-model.js';
+
+const SHIP_DETAIL_DISTANCE = SHIP_LENGTH * 2.3;
+// The tag is only worth showing once the hull is actually legible; at patrol distance
+// it is a ~20px speck, so a floating label there is just noise.
+const SHIP_LABEL_MIN_PX = 48;
+
+// Bodies drawn from the real Sketchfab assets. The others stay procedural icosahedra.
+// Only the mesh is swapped: atmosphere, ring, satellite and theming are untouched.
+const PLANET_MODELS = {
+  cumple: GOLDEN_PLANET_DATA,
+  morpag: PURPLE_PLANET_DATA,
+};
 
 class ThreeSolarSystem {
   constructor(container) {
@@ -7,6 +22,7 @@ class ThreeSolarSystem {
     this.stage = container.querySelector('.solar-system__stage');
     this.previewModal = container.querySelector('.planet-preview');
     this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.selectedScale = 1.35; // how much a selected planet swells; framing depends on it
 
     this.selectedPlanet = null;
     this.hoveredPlanet = null;
@@ -35,17 +51,34 @@ class ThreeSolarSystem {
     this.planetMeshes = [];
     this.labels = [];
 
+    this.ship = null;
+    this.shipHit = null;
+    this.shipLabel = null;
+    this.cockpitExit = null;
+    this.pickTargets = null;   // planetMeshes plus the ship, once it has loaded
+    this.shipPreview = false;
+    this.cockpit = false;
+    this.cockpitYaw = 0;
+    this.cockpitPitch = 0;
+    this.canvasRect = null;
+    this._anchor = new THREE.Vector3();
+    this._eye = new THREE.Vector3();
+    this._look = new THREE.Vector3();
+
     this.init();
   }
 
   getOverviewDistance() {
-    const width = typeof window !== 'undefined' ? window.innerWidth : 800;
-    if (width <= 480) {
-      return 440; // Zoom out slightly so wider planets have generous breathing room from screen edges
-    } else if (width <= 768) {
-      return 360;
-    }
-    return 290;
+    const width = this.stage.clientWidth || window.innerWidth || 800;
+    const height = this.stage.clientHeight || window.innerHeight || 420;
+    const aspect = width / Math.max(height, 1);
+
+    const fov = THREE.MathUtils.degToRad(44);
+    // Distance needed so at least this much world width stays inside the frame.
+    const minVisibleWidth = 300;
+    const required = minVisibleWidth / (2 * Math.tan(fov / 2) * aspect);
+
+    return Math.max(290, Math.min(required, 620));
   }
 
   triggerHaptic(duration = 12) {
@@ -64,6 +97,7 @@ class ThreeSolarSystem {
     this.setupEvents();
     this.checkArrivalTransition();
     this.startLoop();
+    this.setupShip();
   }
 
   setupScene() {
@@ -118,6 +152,30 @@ class ThreeSolarSystem {
     return geo;
   }
 
+  // The generated planet modules arrive recentred with their furthest vertex at 1,
+  // matching THREE.IcosahedronGeometry(radius). Scaling by radius is what keeps the
+  // hit sphere, the framing maths and the ship's landing radius valid.
+  buildGeometryFromData(data, radius) {
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(data.positions, 3));
+    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(data.normals, 3));
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(data.uvs, 2));
+    geometry.setIndex(data.indices);
+    geometry.scale(radius, radius, radius);
+    geometry.computeBoundingSphere();
+    return geometry;
+  }
+
+  loadBlockTexture(dataUrl) {
+    const texture = new THREE.TextureLoader().load(dataUrl);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    // glTF uvs put the origin at the top-left corner, so the loader's default vertical
+    // flip has to be turned off or every map samples mirrored. On the golden planet's
+    // swatch atlas that landed on red instead of gold.
+    texture.flipY = false;
+    return texture;
+  }
+
   createPetalGeometry(length = 18, width = 6.2, thickness = 1.8) {
     const positions = new Float32Array([
       // 0: base
@@ -144,15 +202,80 @@ class ThreeSolarSystem {
     return geo;
   }
 
-  createDistributedPlanets() {
-    // 5 balanced coordinates: 4 outer corners + 1 center sunflower with wider spread
-    const positions = [
-      { x: -128, y: 52, z: 22 },   // Top-left: Nuestro puzzle
-      { x: 124,  y: 58, z: -20 },  // Top-right: Golden Tickets
-      { x: -84,  y: -62, z: -28 }, // Bottom-left: Nuestra historia
-      { x: 114,  y: -54, z: 30 },  // Bottom-right: Códigos secretos
-      { x: 0,    y: -2,  z: 0 },   // Center: Girasol Cósmico
+  getSystemLayout() {
+    const width = this.stage.clientWidth || 800;
+    const height = this.stage.clientHeight || 420;
+    const distance = this.getOverviewDistance();
+    const fov = THREE.MathUtils.degToRad(this.camera.fov);
+
+    const visibleHeight = 2 * distance * Math.tan(fov / 2);
+    const visibleWidth = visibleHeight * (width / height);
+
+    // Reserve room for the planet bodies and their orbit rings near the edges,
+    // so the constellation spreads to fill whatever space is actually left.
+    const edgeRoomX = 52;
+    const edgeRoomY = 50;
+
+    return {
+      spreadX: Math.max(0, Math.min(128, visibleWidth / 2 - edgeRoomX)),
+      spreadY: Math.max(0, Math.min(190, visibleHeight / 2 - edgeRoomY)),
+    };
+  }
+
+  buildLayoutPositions() {
+    // Left/right mirrored silhouette. The two ringed planets sit on opposite
+    // corners so the composition stays visually balanced, with the sunflower
+    // in the middle. Values are fractions of the responsive spread.
+    const template = [
+      { x: -1, y: 1, z: 0.14 },   // Top-left (ringed)
+      { x: 1, y: 1, z: 0.14 },    // Top-right
+      { x: 1, y: -1, z: -0.14 },  // Bottom-right (ringed)
+      { x: -1, y: -1, z: -0.14 }, // Bottom-left
+      { x: 0, y: 0, z: 0 },       // Center
     ];
+
+    const { spreadX, spreadY } = this.getSystemLayout();
+
+    return template.map((p) => ({
+      x: p.x * spreadX,
+      y: p.y * spreadY,
+      z: p.z * spreadX,
+    }));
+  }
+
+  getFocusExtent(planet) {
+    const radius = planet.radius || 23;
+    // The body is swelled by selection, and the ship flies a ring around it, so both
+    // have to fit inside the frame or the ring and the ship clip at the edges.
+    const body = radius * (planet.isSunflower ? 2.05 : 1) * this.selectedScale;
+
+    // The sunflower's bloom already defines its own composition, and widening the
+    // frame to swallow the ship's ring would push it absurdly far away.
+    if (planet.isSunflower) return body;
+
+    const ring = planet.ring ? radius * 1.85 + radius * 0.26 : 0;
+    return Math.max(body, ring, orbitRadiusFor(planet, this.selectedScale));
+  }
+
+  getFocusDistance(planet) {
+    const extent = this.getFocusExtent(planet);
+
+    const fov = THREE.MathUtils.degToRad(this.camera.fov);
+    const width = this.stage.clientWidth || 800;
+    const height = this.stage.clientHeight || 420;
+    const aspect = width / Math.max(height, 1);
+
+    const halfTan = Math.tan(fov / 2);
+    const fill = 0.85; // let the subject occupy ~85% of the tighter axis
+
+    return Math.max(
+      extent / (fill * halfTan),
+      extent / (fill * halfTan * aspect),
+    );
+  }
+
+  createDistributedPlanets() {
+    const positions = this.buildLayoutPositions();
 
     const rotSpeeds = {
       puzzle:   { y: 0.009, x: 0.002, bobPhase: 0,   satSpeed: 0.024 },
@@ -169,14 +292,25 @@ class ThreeSolarSystem {
       this.scene.add(group);
 
       const radius = data.size * 0.32;
-      const geo = this.createPlanetGeometry(radius);
+      const model = PLANET_MODELS[data.id];
+      const geo = model
+        ? this.buildGeometryFromData(model, radius)
+        : this.createPlanetGeometry(radius);
 
-      const mat = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(data.isSunflower ? 0x543216 : data.color),
-        roughness: 0.88,
-        metalness: 0.0,
-        flatShading: true,
-      });
+      // The authored texture carries its own colour, so the planet's theme tint stays on
+      // the atmosphere, the card and the glow rather than multiplying over the map.
+      const mat = model
+        ? new THREE.MeshStandardMaterial({
+          map: this.loadBlockTexture(model.textureDataUrl),
+          roughness: model.roughness,
+          metalness: 0.0,
+        })
+        : new THREE.MeshStandardMaterial({
+          color: new THREE.Color(data.isSunflower ? 0x543216 : data.color),
+          roughness: 0.88,
+          metalness: 0.0,
+          flatShading: true,
+        });
 
       const mesh = new THREE.Mesh(geo, mat);
       mesh.castShadow = true;
@@ -340,6 +474,7 @@ class ThreeSolarSystem {
       const planetObj = {
         ...data,
         basePos: { ...posConfig },
+        radius,
         group,
         mesh,
         flowerGroup,
@@ -437,8 +572,15 @@ class ThreeSolarSystem {
         if (Math.hypot(dx, dy) > 9) {
           this.hasDragged = true;
         }
-        this.targetCameraRotY -= dx * 0.004;
-        this.targetCameraRotX = Math.max(-0.35, Math.min(0.55, this.targetCameraRotX + dy * 0.003));
+        if (this.cockpit) {
+          // Free look: the cabin turns where the finger goes, and the view is no longer
+          // dragged around by the ship's own heading.
+          this.cockpitYaw -= dx * 0.005;
+          this.cockpitPitch = Math.max(-1.35, Math.min(1.35, this.cockpitPitch - dy * 0.004));
+        } else {
+          this.targetCameraRotY -= dx * 0.004;
+          this.targetCameraRotX = Math.max(-0.35, Math.min(0.55, this.targetCameraRotX + dy * 0.003));
+        }
         this.dragStartX = e.clientX;
         this.dragStartY = e.clientY;
       }
@@ -456,13 +598,11 @@ class ThreeSolarSystem {
           this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
           this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
         }
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        const intersects = this.raycaster.intersectObjects(this.planetMeshes);
-        if (intersects.length > 0) {
-          const planet = intersects[0].object.userData.planet;
-          if (planet) {
-            this.selectPlanet(planet);
-          }
+        const hit = this.pickNearest();
+        if (hit && hit.userData.ship) {
+          this.selectShip();
+        } else if (hit && hit.userData.planet) {
+          this.selectPlanet(hit.userData.planet);
         }
       }
 
@@ -482,9 +622,15 @@ class ThreeSolarSystem {
       } else if (e.key === 'ArrowLeft') {
         this.targetCameraRotY -= 0.12;
         this.triggerHaptic(5);
-      } else if (e.key === 'Escape' && this.selectedPlanet) {
-        this.closePreview();
       }
+    });
+
+    // Escape is global on purpose: the preview CTA focuses itself, so a listener bound
+    // to the stage would never see the key while the card is open.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (this.cockpit) this.exitCockpit();
+      else if (this.selectedPlanet || this.shipPreview) this.closePreview();
     });
 
     // Preview close button, backdrop, and CTA button
@@ -494,6 +640,7 @@ class ThreeSolarSystem {
 
     if (closeBtn) closeBtn.addEventListener('click', () => this.closePreview());
     if (backdrop) backdrop.addEventListener('click', () => this.closePreview());
+    if (ctaBtn) ctaBtn.addEventListener('click', (e) => this.departToPlanet(e));
 
     window.addEventListener('resize', () => {
       const w = this.stage.clientWidth || 800;
@@ -502,8 +649,17 @@ class ThreeSolarSystem {
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(w, h);
 
+      this.canvasRect = this.renderer.domElement.getBoundingClientRect();
+
+      if (this.ship) this.ship.setLayout(this.getSystemLayout());
+
       if (!this.selectedPlanet) {
         this.targetCameraDistance = this.getOverviewDistance();
+
+        const positions = this.buildLayoutPositions();
+        this.planets.forEach((planet, i) => {
+          if (positions[i]) planet.basePos = { ...positions[i] };
+        });
       }
     });
   }
@@ -513,13 +669,18 @@ class ThreeSolarSystem {
     this.hoveredPlanet = null;
     this.triggerHaptic(20);
 
+    if (this.ship) {
+      this.ship.setVariantFor(planet.id);
+      this.ship.focusOn(planet);
+    }
+
     const hubEl = document.querySelector('.hub');
     if (hubEl) hubEl.classList.add('has-planet-focus');
     this.container.classList.add('has-focus');
 
     // Zoom and center camera directly on the selected planet
     this.lookAtTarget.set(planet.basePos.x, planet.basePos.y, planet.basePos.z);
-    this.targetCameraDistance = planet.isSunflower ? 124 : 144;
+    this.targetCameraDistance = this.getFocusDistance(planet);
     this.targetCameraRotY = 0;
     this.targetCameraRotX = 0.08;
 
@@ -564,13 +725,12 @@ class ThreeSolarSystem {
   closePreview() {
     this.selectedPlanet = null;
     this.hoveredPlanet = null;
+    this.shipPreview = false;
+    if (this.cockpit) this.exitCockpit();
     this.previewModal.setAttribute('aria-hidden', 'true');
     this.previewModal.classList.remove('is-visible');
 
-    const hubEl = document.querySelector('.hub');
-    if (hubEl) hubEl.classList.remove('has-planet-focus');
-    document.body.classList.remove('has-planet-focus');
-    this.container.classList.remove('has-focus');
+    this.clearHubFocus();
 
     // Return camera to global overview center with responsive distance
     this.lookAtTarget.set(0, 0, 0);
@@ -578,7 +738,245 @@ class ThreeSolarSystem {
     this.targetCameraRotY = 0;
     this.targetCameraRotX = 0.12;
 
+    if (this.ship) this.ship.clearFocus();
+
     this.triggerHaptic(10);
+  }
+
+  selectShip() {
+    if (!this.ship) return;
+
+    this.selectedPlanet = null;
+    this.shipPreview = true;
+    this.triggerHaptic(20);
+
+    const hubEl = document.querySelector('.hub');
+    if (hubEl) hubEl.classList.add('has-planet-focus');
+    this.container.classList.add('has-focus');
+
+    // The hull keeps flying, so lookAtTarget is refreshed every frame instead of here.
+    this.targetCameraDistance = SHIP_DETAIL_DISTANCE;
+    this.targetCameraRotY = 0;
+    this.targetCameraRotX = 0.08;
+
+    const titleEl = this.previewModal.querySelector('.planet-preview__title');
+    const tagEl = this.previewModal.querySelector('.planet-preview__tag');
+    const descEl = this.previewModal.querySelector('.planet-preview__desc');
+    const ctaEl = this.previewModal.querySelector('.planet-preview__cta');
+    const iconWrapper = this.previewModal.querySelector('.planet-preview__icon-sphere');
+    const cardEl = this.previewModal.querySelector('.planet-preview__card');
+
+    if (titleEl) titleEl.textContent = 'Nave de Thania';
+    if (tagEl) tagEl.textContent = 'Nuestra nave';
+    if (descEl) descEl.textContent = 'Nos lleva de mundo en mundo. Viajando juntos hasta el fin del universo.';
+    if (ctaEl) {
+      ctaEl.href = '#';
+      ctaEl.style.setProperty('--btn-glow', 'rgba(255, 204, 213, 0.65)');
+      // Deep enough for the button's white label to stay readable; the pale #ffccd5
+      // washed the text out.
+      ctaEl.style.setProperty('--btn-color', '#b8546f');
+      const ctaSpan = ctaEl.querySelector('span');
+      if (ctaSpan) ctaSpan.textContent = 'Ver desde la cabina';
+    }
+    if (cardEl) cardEl.style.setProperty('--card-accent', '#ffccd5');
+    if (iconWrapper) {
+      iconWrapper.style.setProperty('--sphere-atmosphere', 'radial-gradient(circle at 34% 30%, #fff5f8 0%, #ffd9e6 45%, #c98aa6 84%, #2a0f18 100%)');
+      iconWrapper.style.setProperty('--sphere-glow', 'rgba(255, 204, 213, 0.65)');
+      iconWrapper.innerHTML = '<div class="planet-preview__svg-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div>';
+    }
+
+    this.previewModal.setAttribute('aria-hidden', 'false');
+    this.previewModal.classList.add('is-visible');
+    if (ctaEl) setTimeout(() => ctaEl.focus(), 150);
+  }
+
+  enterCockpit() {
+    if (!this.ship || this.cockpit) return;
+    this.cockpit = true;
+    this.shipPreview = false;
+    this.triggerHaptic(25);
+
+    // Face the way the hull was travelling, so stepping in is not a jump.
+    this.cockpitYaw = Math.atan2(this.ship.heading.x, this.ship.heading.z);
+    this.cockpitPitch = Math.asin(Math.max(-1, Math.min(1, this.ship.heading.y)));
+
+    this.previewModal.classList.remove('is-visible');
+    this.previewModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.add('is-ship-cockpit');
+    if (this.cockpitExit) this.cockpitExit.hidden = false;
+    if (this.shipLabel) this.shipLabel.hidden = true;
+  }
+
+  // The ship card sets the same focus state the planet card does, so leaving the cabin has
+  // to clear it too, or the footer and the music widget stay faded out for good.
+  clearHubFocus() {
+    const hubEl = document.querySelector('.hub');
+    if (hubEl) hubEl.classList.remove('has-planet-focus');
+    document.body.classList.remove('has-planet-focus');
+    this.container.classList.remove('has-focus');
+  }
+
+  exitCockpit() {
+    if (!this.cockpit) return;
+    this.cockpit = false;
+    this.ship.setVisible(true);
+
+    this.clearHubFocus();
+    document.body.classList.remove('is-ship-cockpit');
+    if (this.cockpitExit) this.cockpitExit.hidden = true;
+    if (this.shipLabel) this.shipLabel.hidden = false;
+
+    // Start the pull-back at the hull so leaving the cabin reads as a move, not a cut.
+    this.ship.worldCenter(this.currentLookAt);
+    this.lookAtTarget.set(0, 0, 0);
+    this.cameraDistance = SHIP_LENGTH * 0.5;
+    this.targetCameraDistance = this.getOverviewDistance();
+    this.targetCameraRotY = 0;
+    this.targetCameraRotX = 0.12;
+    this.triggerHaptic(10);
+  }
+
+  applyCockpitCamera() {
+    const ship = this.ship;
+    ship.setVisible(false);
+
+    // The cabin sits at the hull's front tip and just above its mid-height. The model is
+    // symmetric along its length, so either end is the "front".
+    const up = ship.worldUp(this._anchor);
+    const eye = this._eye.copy(ship.group.position)
+      .addScaledVector(ship.heading, SHIP_LENGTH * 0.5)
+      .addScaledVector(up, ship.hullHeight() * 0.62);
+
+    ship.worldCenter(this.lookAtTarget);
+    this.currentLookAt.copy(this.lookAtTarget);
+
+    const cosPitch = Math.cos(this.cockpitPitch);
+    const gaze = this._look.set(
+      Math.sin(this.cockpitYaw) * cosPitch,
+      Math.sin(this.cockpitPitch),
+      Math.cos(this.cockpitYaw) * cosPitch,
+    );
+
+    this.camera.position.copy(eye);
+    this.camera.lookAt(this._anchor.copy(eye).addScaledVector(gaze, SHIP_LENGTH * 12));
+  }
+
+  updateShipLabel() {
+    const label = this.shipLabel;
+    if (!label) return;
+
+    const rect = this.canvasRect || this.renderer.domElement.getBoundingClientRect();
+
+    // Apparent height in pixels, not distance, so the tag appears on any screen size
+    // only once the hull is big enough to be worth naming.
+    const distance = Math.max(0.001, this.camera.position.distanceTo(this.ship.group.position));
+    const pixelsPerUnit = rect.height / (2 * distance * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2));
+
+    if (this.cockpit || this.ship.hullHeight() * pixelsPerUnit < SHIP_LABEL_MIN_PX) {
+      label.hidden = true;
+      return;
+    }
+
+    this.ship.worldLabelAnchor(this._anchor).project(this.camera);
+    if (this._anchor.z > 1) {
+      label.hidden = true;
+      return;
+    }
+
+    const x = rect.left + (this._anchor.x * 0.5 + 0.5) * rect.width;
+    const y = rect.top + (-this._anchor.y * 0.5 + 0.5) * rect.height;
+
+    label.hidden = false;
+    label.style.transform = `translate(-50%, -100%) translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+  }
+
+  setupShip() {
+    // The hull weighs ~733 KB, so it is pulled in as its own chunk rather than
+    // delaying the constellation's first paint. Until it arrives the CTA just navigates.
+    PlanetaryShip.create({
+      scene: this.scene,
+      reducedMotion: this.prefersReducedMotion,
+      layout: this.getSystemLayout(),
+    })
+      .then((ship) => {
+        this.ship = ship;
+        this.shipHit = ship.hitMesh;
+        this.pickTargets = this.planetMeshes.concat([ship.hitMesh]);
+        this.canvasRect = this.renderer.domElement.getBoundingClientRect();
+        this.buildShipUi();
+      })
+      .catch(() => {});
+  }
+
+  buildShipUi() {
+    const label = document.createElement('button');
+    label.type = 'button';
+    label.className = 'ship-label';
+    label.innerHTML = '<span class="ship-label__dot" aria-hidden="true"></span><span class="ship-label__name">Nave de Thania</span>';
+    label.setAttribute('aria-label', 'Nave de Thania: verla de cerca');
+    label.addEventListener('click', (event) => {
+      event.preventDefault();
+      this.selectShip();
+    });
+    document.body.appendChild(label);
+    this.shipLabel = label;
+
+    const exit = document.createElement('button');
+    exit.type = 'button';
+    exit.className = 'ship-cockpit-exit';
+    exit.textContent = 'Salir de la cabina';
+    exit.hidden = true;
+    exit.addEventListener('click', (event) => {
+      event.preventDefault();
+      this.exitCockpit();
+    });
+    document.body.appendChild(exit);
+    this.cockpitExit = exit;
+  }
+
+  pickNearest() {
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    const hits = this.raycaster.intersectObjects(this.pickTargets || this.planetMeshes);
+    return hits.length ? hits[0].object : null;
+  }
+
+  departToPlanet(event) {
+    if (event) event.preventDefault();
+
+    // The same button doubles as the ship's entry into the cockpit.
+    if (this.shipPreview) {
+      this.enterCockpit();
+      return;
+    }
+
+    if (this.isDeparting) return;
+    this.isDeparting = true;
+
+    const ctaEl = this.previewModal.querySelector('.planet-preview__cta');
+    const href = (ctaEl && ctaEl.getAttribute('href')) || './';
+    const planet = this.selectedPlanet;
+
+    let departed = false;
+    const leave = () => {
+      if (departed) return;
+      departed = true;
+      window.location.href = href;
+    };
+
+    // Safety net: a backgrounded tab pauses requestAnimationFrame, so leaving must
+    // never depend on the landing animation finishing.
+    window.setTimeout(leave, 2600);
+
+    if (this.prefersReducedMotion || !this.ship || !planet) {
+      leave();
+      return;
+    }
+
+    this.triggerHaptic(25);
+    this.previewModal.classList.remove('is-visible');
+    this.previewModal.setAttribute('aria-hidden', 'true');
+
+    if (!this.ship.landOn(planet, leave)) leave();
   }
 
   checkArrivalTransition() {
@@ -636,28 +1034,37 @@ class ThreeSolarSystem {
     const w = this.renderer.domElement.clientWidth;
     const h = this.renderer.domElement.clientHeight;
 
-    // Smooth camera target and position interpolation
-    this.currentLookAt.lerp(this.lookAtTarget, 0.07);
-    this.cameraDistance += (this.targetCameraDistance - this.cameraDistance) * 0.07;
-    this.cameraRotY += (this.targetCameraRotY - this.cameraRotY) * 0.08;
-    this.cameraRotX += (this.targetCameraRotX - this.cameraRotX) * 0.08;
-    this.updateCameraTransform();
+    if (this.cockpit && this.ship) {
+      this.applyCockpitCamera();
+    } else {
+      if (this.shipPreview && this.ship) {
+        // Ride along with the hull as it circles the constellation.
+        this.ship.worldCenter(this.lookAtTarget);
+      }
+      // Smooth camera target and position interpolation
+      this.currentLookAt.lerp(this.lookAtTarget, 0.07);
+      this.cameraDistance += (this.targetCameraDistance - this.cameraDistance) * 0.07;
+      this.cameraRotY += (this.targetCameraRotY - this.cameraRotY) * 0.08;
+      this.cameraRotX += (this.targetCameraRotX - this.cameraRotX) * 0.08;
+      this.updateCameraTransform();
+    }
 
     // Check hover state
     if (!this.isDragging) {
-      this.raycaster.setFromCamera(this.mouse, this.camera);
-      const intersects = this.raycaster.intersectObjects(this.planetMeshes);
-      if (intersects.length > 0) {
-        this.hoveredPlanet = intersects[0].object.userData.planet;
-        this.renderer.domElement.style.cursor = 'pointer';
-      } else {
-        this.hoveredPlanet = null;
-        this.renderer.domElement.style.cursor = this.isDragging ? 'grabbing' : 'grab';
-      }
+      const hit = this.pickNearest();
+      this.hoveredPlanet = (hit && hit.userData.planet) || null;
+      this.renderer.domElement.style.cursor = hit
+        ? 'pointer'
+        : (this.isDragging ? 'grabbing' : 'grab');
     }
 
     if (this.particles) {
       this.particles.rotation.y += 0.00015;
+    }
+
+    if (this.ship) {
+      this.ship.update(time);
+      this.updateShipLabel();
     }
 
     this.planets.forEach((planet) => {
@@ -690,7 +1097,7 @@ class ThreeSolarSystem {
       const isHovered = this.hoveredPlanet && this.hoveredPlanet.id === planet.id;
 
       if (isSelected) {
-        planet.targetScale = 1.35;
+        planet.targetScale = this.selectedScale;
       } else if (isHovered) {
         planet.targetScale = 1.15;
       } else {
