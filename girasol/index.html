@@ -13,7 +13,6 @@
     <!-- Header with Cosmic Back Button and Snake Skin Selector -->
     <header class="girasol-header">
       <div class="girasol-header__titles">
-        <span class="girasol-header__badge">Universo Secreto</span>
         <h1 class="girasol-header__title">El Prado Dorado</h1>
       </div>
 
@@ -40,21 +39,10 @@
     </header>
 
     <!-- Game HUD -->
-    <div class="girasol-hud" aria-label="Estado del juego">
-      <div class="girasol-hud__bar-wrap">
-        <div class="girasol-hud__labels">
-          <span class="girasol-hud__label">
-            <span class="girasol-hud__icon">🌻</span>
-            Maleza despejada
-          </span>
-          <span class="girasol-hud__percent" id="hud-percent">0%</span>
-        </div>
-        <div class="girasol-hud__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hud-progressbar">
-          <div class="girasol-hud__fill" id="hud-fill"></div>
-        </div>
-      </div>
-      <div class="girasol-hud__counter" id="hud-counter">
-        Cosechando: 0 / 0
+    <div class="girasol-hud" aria-label="Progreso del juego">
+      <span class="girasol-hud__percent" id="hud-percent">0%</span>
+      <div class="girasol-hud__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hud-progressbar">
+        <div class="girasol-hud__fill" id="hud-fill"></div>
       </div>
     </div>
 
@@ -104,8 +92,8 @@
         <div class="secret-modal__signature" id="secret-sig"></div>
 
         <div class="secret-modal__actions">
-          <button class="secret-modal__btn secret-modal__btn--explore" id="secret-btn-continue" type="button">
-            <span>Seguir en el prado</span>
+          <button class="secret-modal__btn secret-modal__btn--explore" id="secret-btn-restart" type="button">
+            <span>Jugar de nuevo</span>
           </button>
           <a class="secret-modal__btn secret-modal__btn--cosmos" href="../index.html">
             <span>Volver al cosmos</span>

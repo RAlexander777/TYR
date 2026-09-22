@@ -60,15 +60,6 @@ html, body {
   gap: 2px;
 }
 
-.girasol-header__badge {
-  font-size: 0.72rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--color-gold);
-  font-weight: 500;
-  opacity: 0.9;
-}
-
 .girasol-header__title {
   font-family: var(--font-display);
   font-size: clamp(1.4rem, 3.8vw, 2.2rem);
@@ -151,51 +142,30 @@ html, body {
 /* HUD Progress Bar */
 .girasol-hud {
   position: absolute;
-  top: 86px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 29px; /* vertically centred against the 68px turbo button at bottom: 24px */
+  left: 20px;
   z-index: 30;
-  width: min(90vw, 360px);
+  width: min(42vw, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   background: rgba(22, 14, 8, 0.78);
   border: 1px solid rgba(245, 158, 11, 0.35);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-radius: 20px;
-  padding: 10px 16px 8px;
+  padding: 10px 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 16px rgba(245, 158, 11, 0.15);
   pointer-events: none;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
-.girasol-hud__bar-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.girasol-hud__labels {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.8rem;
-}
-
-.girasol-hud__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #e5e7eb;
-  font-weight: 500;
-}
-
-.girasol-hud__icon {
-  font-size: 1rem;
-}
-
 .girasol-hud__percent {
   font-family: var(--font-display);
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-gold-light);
+  text-align: right;
   text-shadow: 0 0 10px var(--color-gold-glow);
 }
 
@@ -215,14 +185,6 @@ html, body {
   border-radius: 999px;
   box-shadow: 0 0 12px rgba(245, 158, 11, 0.8);
   transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.girasol-hud__counter {
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: right;
-  margin-top: 3px;
-  letter-spacing: 0.5px;
 }
 
 /* Controls Bottom Hint */
@@ -534,8 +496,37 @@ html, body {
   .secret-modal__card {
     padding: 28px 18px 22px;
   }
+
+  /* Stack the header so the skin row no longer runs underneath the fixed
+     cosmos exit button pinned to the top-right corner. */
+  .girasol-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px 0;
+  }
+
+  .girasol-header__titles {
+    max-width: calc(100% - 48px);
+  }
+
+  .girasol-header__title {
+    font-size: 1.35rem;
+    line-height: 1.15;
+  }
+
+  .girasol-skins {
+    gap: 6px;
+    padding: 4px 8px;
+  }
+
+  .girasol-skin-chip {
+    width: 26px;
+    height: 26px;
+  }
+
   .girasol-hud {
-    width: 92vw;
-    top: 76px;
+    left: 16px;
+    width: calc(100% - 116px); /* leave the bottom-right corner to the turbo button */
   }
 }

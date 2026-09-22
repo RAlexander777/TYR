@@ -12,6 +12,7 @@ import confetti from 'canvas-confetti';
 import { initSpaceExit } from '../src/lib/space-transition.js';
 
 import { GRASS_BLOCK_DATA, SUNFLOWER_BLOCK_DATA } from './meadow-models.js';
+import { TULIP_BLOCK_DATA } from './tulip-model.js';
 
 // ============================================================================
 // MENSAJE SECRETO: Edita este bloque para cambiar el texto que se descubre
@@ -42,7 +43,6 @@ class SlitherMeadowGame {
     this.stage = document.getElementById('girasol-stage');
     this.hudPercent = document.getElementById('hud-percent');
     this.hudFill = document.getElementById('hud-fill');
-    this.hudCounter = document.getElementById('hud-counter');
     this.secretModal = document.getElementById('secret-modal');
 
     this.fieldWidth = 90;
@@ -50,6 +50,7 @@ class SlitherMeadowGame {
     this.totalMeadowBlocks = 0;
     this.eatenBlocks = 0;
     this.isGameCompleted = false;
+    this.isPaused = false;
 
     // Pick a random stanza once per game session
     const stanzas = SECRET_MESSAGE.stanzas;
@@ -120,6 +121,7 @@ class SlitherMeadowGame {
     this.joystickKnob = this.joystickEl ? this.joystickEl.querySelector('.girasol-joystick__knob') : null;
     this.joystickActive = false;
     this.joystickCenter = { x: 0, y: 0 };
+    this.touchOrigin = { x: 0, y: 0 };
     this.joystickVector = new THREE.Vector2(0, 0);
 
     this.init();
@@ -368,7 +370,23 @@ class SlitherMeadowGame {
       alphaTest: 0.05,
     });
 
-    // 3. Meadow block grid distribution: ~60% Grass, ~40% Sunflowers
+    // 2b. Tulip block, restyled from the photoreal GLB to match the voxel look
+    const tulipGeo = this.buildGeometryFromData(TULIP_BLOCK_DATA);
+    const tulipTexLoader = new THREE.TextureLoader();
+    const tulipTexture = tulipTexLoader.load(TULIP_BLOCK_DATA.textureDataUrl);
+    tulipTexture.colorSpace = THREE.SRGBColorSpace;
+    tulipTexture.magFilter = THREE.NearestFilter;
+    tulipTexture.minFilter = THREE.NearestMipmapLinearFilter;
+
+    this.tulipMaterial = new THREE.MeshStandardMaterial({
+      map: tulipTexture,
+      roughness: 0.78,
+      metalness: 0.03,
+      side: THREE.DoubleSide,
+      alphaTest: 0.05,
+    });
+
+    // 3. Meadow block grid distribution: grass everywhere, sunflowers on a coarser lattice
     // Models scaled up substantially so they look prominent and rich
     const cols = 26;
     const rows = 26;
@@ -393,39 +411,45 @@ class SlitherMeadowGame {
         const x = baseX + jitterX;
         const z = baseZ + jitterZ;
 
-        // Determine if sunflower (~40%) with natural organic clustering
-        const noiseVal = Math.sin(c * 0.45 + r * 0.38) * Math.cos(r * 0.42 - c * 0.28);
-        const randomFactor = Math.random();
-        const isSunflower = (noiseVal * 0.45 + randomFactor * 0.55) > 0.58;
+        // Sunflowers sit on a coarser lattice. Their block model is 3 units wide,
+        // so placing one per cell at the field's 3.25 spacing made neighbouring
+        // flower heads interpenetrate into an unreadable canopy of yellow slabs.
+        const onSunflowerLattice = c % 3 === 1 && r % 3 === 1;
+        const isSunflower = onSunflowerLattice && Math.random() > 0.15;
+        // Tulips are far thinner (0.35 wide), so they fill the cells in between
+        const isTulip = !onSunflowerLattice && Math.random() > 0.72;
 
         // Random continuous Y-axis rotation (0 to 360 degrees)
         // Clean Y rotation preserves the vertical stem and upright flower petals without distortion
         const rotY = Math.random() * Math.PI * 2;
 
-        // Substantially increased scales:
-        // Grass: base model is 1.6x1.2x1.5 -> scale 2.65 - 3.10 makes it lush
-        // Sunflowers: scale 2.75 - 3.25 makes the flower field prominent and vibrant
+        // Scales keep each block within its lattice spacing. Base models:
+        // grass 1.6x1.2x1.5, sunflower 3x1.5x3, tulip 0.35x1.5x0.36.
         const scale = isSunflower
-          ? 2.75 + Math.random() * 0.50
-          : 2.65 + Math.random() * 0.45;
+          ? 2.50 + Math.random() * 0.30
+          : isTulip
+            ? 2.10 + Math.random() * 0.70
+            : 2.65 + Math.random() * 0.45;
 
         blockConfigs.push({
           x,
           z,
           isSunflower,
+          isTulip,
           rotY,
           scale,
         });
       }
     }
 
-    const grassList = blockConfigs.filter(b => !b.isSunflower);
+    const grassList = blockConfigs.filter(b => !b.isSunflower && !b.isTulip);
     const sunflowerList = blockConfigs.filter(b => b.isSunflower);
+    const tulipList = blockConfigs.filter(b => b.isTulip);
 
     this.totalMeadowBlocks = blockConfigs.length;
     this.eatenBlocks = 0;
 
-    // 4. Create InstancedMesh for both types
+    // 4. Create an InstancedMesh per block type
     this.grassMesh = new THREE.InstancedMesh(grassGeo, this.grassMaterial, grassList.length);
     this.grassMesh.castShadow = true;
     this.grassMesh.receiveShadow = true;
@@ -433,6 +457,10 @@ class SlitherMeadowGame {
     this.sunflowerMesh = new THREE.InstancedMesh(sunflowerGeo, this.sunflowerMaterial, sunflowerList.length);
     this.sunflowerMesh.castShadow = true;
     this.sunflowerMesh.receiveShadow = true;
+
+    this.tulipMesh = new THREE.InstancedMesh(tulipGeo, this.tulipMaterial, tulipList.length);
+    this.tulipMesh.castShadow = true;
+    this.tulipMesh.receiveShadow = true;
 
     this.blocksData = [];
     this.gridBuckets = new Map();
@@ -488,11 +516,37 @@ class SlitherMeadowGame {
       this.gridBuckets.get(cellKey).push(blockObj);
     });
 
+    // Populate Tulip InstancedMesh
+    tulipList.forEach((b, idx) => {
+      dummy.position.set(b.x, 0, b.z);
+      dummy.rotation.set(0, b.rotY, 0);
+      dummy.scale.set(b.scale, b.scale, b.scale);
+      dummy.updateMatrix();
+      this.tulipMesh.setMatrixAt(idx, dummy.matrix);
+
+      const blockObj = {
+        id: this.blocksData.length,
+        type: 'tulip',
+        meshIndex: idx,
+        x: b.x,
+        z: b.z,
+        scale: b.scale,
+        isEaten: false,
+      };
+      this.blocksData.push(blockObj);
+
+      const cellKey = this.getCellKey(b.x, b.z);
+      if (!this.gridBuckets.has(cellKey)) this.gridBuckets.set(cellKey, []);
+      this.gridBuckets.get(cellKey).push(blockObj);
+    });
+
     this.grassMesh.instanceMatrix.needsUpdate = true;
     this.sunflowerMesh.instanceMatrix.needsUpdate = true;
+    this.tulipMesh.instanceMatrix.needsUpdate = true;
 
     this.scene.add(this.grassMesh);
     this.scene.add(this.sunflowerMesh);
+    this.scene.add(this.tulipMesh);
 
     this.updateHUD();
   }
@@ -814,32 +868,73 @@ class SlitherMeadowGame {
       }
     };
 
+    // Touch steering is relative: the direction the finger is pulled from where it
+    // first landed becomes the heading. Aiming at the absolute point under the finger
+    // meant the hand covered the snake and short drags whipped the heading around.
+    const TOUCH_DEAD_ZONE = 12;
+
+    const steerFromTouch = (clientX, clientY) => {
+      const dx = clientX - this.touchOrigin.x;
+      const dy = clientY - this.touchOrigin.y;
+      const mag = Math.hypot(dx, dy);
+      if (mag < TOUCH_DEAD_ZONE) return; // inside the dead zone the snake keeps cruising
+
+      this.isUserSteering = true;
+      const head = this.snakeSegments[0].pos;
+      // The camera looks straight down -Z with no yaw, so screen +x maps to world +x
+      // and screen +y maps to world +z.
+      this.targetPoint.set(head.x + (dx / mag) * 20, 0, head.z + (dy / mag) * 20);
+    };
+
+    const moveJoystickKnob = (clientX, clientY) => {
+      if (!this.joystickActive || !this.joystickKnob) return;
+      const dx = clientX - this.joystickCenter.x;
+      const dy = clientY - this.joystickCenter.y;
+      const dist = Math.min(42, Math.hypot(dx, dy));
+      const angle = Math.atan2(dy, dx);
+      this.joystickKnob.style.transform =
+        `translate(calc(-50% + ${Math.cos(angle) * dist}px), calc(-50% + ${Math.sin(angle) * dist}px))`;
+    };
+
     window.addEventListener('pointermove', (e) => {
-      // On mouse desktop, moving pointer always updates target direction
-      if (e.pointerType === 'mouse' || this.pointerDown) {
+      if (e.pointerType === 'mouse') {
+        // Mouse keeps precise absolute aiming at the point under the cursor.
         this.isUserSteering = true;
         updateTargetFromPointer(e.clientX, e.clientY);
+        return;
+      }
+
+      if (this.pointerDown) {
+        steerFromTouch(e.clientX, e.clientY);
+        moveJoystickKnob(e.clientX, e.clientY);
       }
     });
 
     window.addEventListener('pointerdown', (e) => {
       if (e.target.closest('.secret-modal') || e.target.closest('.cosmos-exit-btn') || e.target.closest('.girasol-boost-btn')) return;
       this.pointerDown = true;
-      updateTargetFromPointer(e.clientX, e.clientY);
 
-      // On desktop mouse: holding left click triggers turbo boost
+      // On desktop mouse: absolute aiming, plus holding left click triggers turbo boost
       if (e.pointerType === 'mouse') {
+        this.isUserSteering = true;
+        updateTargetFromPointer(e.clientX, e.clientY);
         this.isBoosting = true;
         this.currentSpeed = this.boostSpeed;
+        return;
       }
 
-      // On touch devices: activate joystick / guide anchor WITHOUT forcing turbo speed
-      if (e.pointerType === 'touch' && this.joystickEl) {
+      // On touch: remember where the drag starts. The drag steers relative to this
+      // origin, so the snake never jumps to the point under the finger.
+      this.touchOrigin = { x: e.clientX, y: e.clientY };
+      if (this.joystickEl) {
         this.joystickActive = true;
         this.joystickCenter = { x: e.clientX, y: e.clientY };
         this.joystickEl.style.left = `${e.clientX}px`;
         this.joystickEl.style.top = `${e.clientY}px`;
         this.joystickEl.classList.add('is-active');
+        if (this.joystickKnob) {
+          this.joystickKnob.style.transform = 'translate(-50%, -50%)';
+        }
       }
     });
 
@@ -887,23 +982,13 @@ class SlitherMeadowGame {
       this.boostBtnEl.addEventListener('touchend', deactivateBoost, { passive: false });
     }
 
-    // Touch movement steering
+    // Touch movement steering (pointer events already cover touch on modern
+    // browsers; this stays as a fallback path for older engines)
     window.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) {
-        this.isUserSteering = true;
-        const touch = e.touches[0];
-        updateTargetFromPointer(touch.clientX, touch.clientY);
-
-        if (this.joystickActive && this.joystickKnob) {
-          const dx = touch.clientX - this.joystickCenter.x;
-          const dy = touch.clientY - this.joystickCenter.y;
-          const dist = Math.min(42, Math.hypot(dx, dy));
-          const angle = Math.atan2(dy, dx);
-          const kx = Math.cos(angle) * dist;
-          const ky = Math.sin(angle) * dist;
-          this.joystickKnob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`;
-        }
-      }
+      if (e.touches.length === 0) return;
+      const touch = e.touches[0];
+      steerFromTouch(touch.clientX, touch.clientY);
+      moveJoystickKnob(touch.clientX, touch.clientY);
     }, { passive: true });
 
     window.addEventListener('touchend', () => { this.isUserSteering = false; }, { passive: true });
@@ -921,11 +1006,11 @@ class SlitherMeadowGame {
 
     // Modal buttons
     const closeBtn = document.getElementById('secret-close');
-    const continueBtn = document.getElementById('secret-btn-continue');
+    const restartBtn = document.getElementById('secret-btn-restart');
     const closeModal = () => this.secretModal.classList.remove('is-visible');
 
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (continueBtn) continueBtn.addEventListener('click', closeModal);
+    if (restartBtn) restartBtn.addEventListener('click', () => this.restartGame());
 
     // Responsive resize
     window.addEventListener('resize', () => {
@@ -958,6 +1043,7 @@ class SlitherMeadowGame {
     let hasEatenAny = false;
     let grassUpdated = false;
     let sunflowerUpdated = false;
+    let tulipUpdated = false;
 
     // Check surrounding 3x3 cells in spatial grid
     const centerCellX = Math.floor(headPos.x / this.gridCellSize);
@@ -992,6 +1078,11 @@ class SlitherMeadowGame {
               grassUpdated = true;
               // Subtle earthy green-gold pollen burst
               this.spawnPollen(b.x, b.z, 2);
+            } else if (b.type === 'tulip') {
+              this.tulipMesh.setMatrixAt(b.meshIndex, dummy.matrix);
+              tulipUpdated = true;
+              // Delicate golden tulip pollen burst
+              this.spawnPollen(b.x, b.z, 3);
             } else {
               this.sunflowerMesh.setMatrixAt(b.meshIndex, dummy.matrix);
               sunflowerUpdated = true;
@@ -1006,6 +1097,7 @@ class SlitherMeadowGame {
     if (hasEatenAny) {
       if (grassUpdated) this.grassMesh.instanceMatrix.needsUpdate = true;
       if (sunflowerUpdated) this.sunflowerMesh.instanceMatrix.needsUpdate = true;
+      if (tulipUpdated) this.tulipMesh.instanceMatrix.needsUpdate = true;
 
       this.revealGroundAt(headPos.x, headPos.z, 4.6);
       this.updateHUD();
@@ -1027,11 +1119,12 @@ class SlitherMeadowGame {
     const pct = Math.min(100, Math.floor((this.eatenBlocks / this.totalMeadowBlocks) * 100));
     if (this.hudPercent) this.hudPercent.textContent = `${pct}%`;
     if (this.hudFill) this.hudFill.style.width = `${pct}%`;
-    if (this.hudCounter) this.hudCounter.textContent = `Despejando: ${this.eatenBlocks} / ${this.totalMeadowBlocks}`;
   }
 
   triggerGameCompletion() {
     this.isGameCompleted = true;
+    // Freeze the snake while the letter is on screen
+    this.isPaused = true;
 
     // Trigger celebration confetti
     try {
@@ -1066,7 +1159,62 @@ class SlitherMeadowGame {
     }, 1200);
   }
 
+  restartGame() {
+    this.secretModal.classList.remove('is-visible');
+
+    // Tear down the cleared meadow so the letter is buried under fresh plants again
+    for (const mesh of [this.grassMesh, this.sunflowerMesh, this.tulipMesh]) {
+      if (!mesh) continue;
+      this.scene.remove(mesh);
+      mesh.geometry.dispose();
+      if (mesh.material.map) mesh.material.map.dispose();
+      mesh.material.dispose();
+    }
+    this.grassMesh = null;
+    this.sunflowerMesh = null;
+    this.tulipMesh = null;
+
+    // Rebuild the snake at its starting pose
+    if (this.snakeGroup) {
+      this.scene.remove(this.snakeGroup);
+      this.snakeGroup.traverse((obj) => {
+        if (obj.geometry) obj.geometry.dispose();
+      });
+      this.snakeGroup = null;
+    }
+    for (const mat of [this.snakeHeadMat, this.snakeBodyMat, this.snakeTongueMat]) {
+      if (!mat) continue;
+      if (mat.map) mat.map.dispose();
+      mat.dispose();
+    }
+
+    this.moveDirection.set(0, 0, 1);
+    this.targetPoint.set(0, 0, 10);
+    this.isUserSteering = false;
+    this.isBoosting = false;
+    this.currentSpeed = this.baseSpeed;
+
+    // Every run gets its own random stanza
+    const stanzas = SECRET_MESSAGE.stanzas;
+    this.selectedStanza = stanzas[Math.floor(Math.random() * stanzas.length)];
+
+    this.drawInitialGround();
+    this.setupMeadowField();
+    this.setupSnake();
+    this.populateModalText();
+
+    this.isGameCompleted = false;
+    this.isPaused = false;
+    this.updateHUD();
+
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(20); } catch {}
+    }
+  }
+
   updateSnake(delta) {
+    if (this.isPaused) return;
+
     const head = this.snakeSegments[0];
     const headPos = head.pos;
 
