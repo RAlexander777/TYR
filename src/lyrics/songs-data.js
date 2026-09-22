@@ -1,12 +1,14 @@
 import songDosSegundos from '../music/Dos Segundos.mp3';
 import songVuelaConmigo from '../music/Vuela Conmigo.mp3';
-import songPoeta from '../music/El poeta.mp3';
 import songTu from '../music/Tu.mp3';
+import songEfecto from '../music/Efecto.mp3';
+import songTalisman from '../music/Talisman.mp3';
 
 import lrcDosSegundos from '../music/dos_segundos.lrc?raw';
 import lrcVuelaConmigo from '../music/vuela_conmigo.lrc?raw';
-import lrcPoeta from '../music/el_poeta.lrc?raw';
 import lrcTu from '../music/tu.lrc?raw';
+import lrcEfecto from '../music/efecto.lrc?raw';
+import lrcTalisman from '../music/talisman.lrc?raw';
 
 /**
  * Parses raw LRC string into a sorted array of { time: number (seconds), text: string }
@@ -72,17 +74,6 @@ export const SONGS = [
     glow: 'rgba(56, 189, 248, 0.45)',
   },
   {
-    id: 'el_poeta',
-    title: 'El Poeta',
-    artist: 'Chino & Nacho',
-    durationStr: '3:38',
-    src: songPoeta,
-    lrcRaw: lrcPoeta,
-    lines: parseLrc(lrcPoeta),
-    accent: '#e5b95c', // golden
-    glow: 'rgba(229, 185, 92, 0.45)',
-  },
-  {
     id: 'tu',
     title: 'Tú',
     artist: 'Noelia',
@@ -92,6 +83,28 @@ export const SONGS = [
     lines: parseLrc(lrcTu),
     accent: '#fb7185', // rose
     glow: 'rgba(251, 113, 133, 0.45)',
+  },
+  {
+    id: 'efecto',
+    title: 'Efecto',
+    artist: 'Bad Bunny',
+    durationStr: '3:34',
+    src: songEfecto,
+    lrcRaw: lrcEfecto,
+    lines: parseLrc(lrcEfecto),
+    accent: '#fb923c', // sunlit orange
+    glow: 'rgba(251, 146, 60, 0.45)',
+  },
+  {
+    id: 'talisman',
+    title: 'Talismán',
+    artist: 'Rata Blanca',
+    durationStr: '5:11',
+    src: songTalisman,
+    lrcRaw: lrcTalisman,
+    lines: parseLrc(lrcTalisman),
+    accent: '#a78bfa', // mystic violet
+    glow: 'rgba(167, 139, 250, 0.45)',
   },
 ];
 
