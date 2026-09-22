@@ -15,7 +15,8 @@
     "@fontsource/montserrat": "^5.1.0",
     "@fontsource/playfair-display": "^5.1.0",
     "@fontsource/poppins": "^5.1.0",
-    "canvas-confetti": "^1.9.3"
+    "canvas-confetti": "^1.9.3",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "sharp": "^0.33.5",

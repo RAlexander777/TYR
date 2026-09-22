@@ -103,3 +103,26 @@ a {
     scroll-behavior: auto !important;
   }
 }
+
+/* Floating hearts for interactive bursts */
+.floating-heart {
+  position: absolute;
+  font-size: 20px;
+  z-index: 50;
+  pointer-events: none;
+  animation: heart-burst 2s ease-out forwards;
+}
+
+@keyframes heart-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.6);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--float-x, 0px), -120px) scale(1.4);
+  }
+}

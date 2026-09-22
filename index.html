@@ -10,39 +10,78 @@
     <meta name="theme-color" content="#1a1314" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <title>TYR · Para Thania</title>
+    <script>
+      (function () {
+        try {
+          var s = window.location.search;
+          var r = document.referrer || '';
+          if (s.indexOf('from=') !== -1 || /cumple|historia|puzzle|morpag|flow/.test(r) || sessionStorage.getItem('tyr_skip_loader') === '1') {
+            document.documentElement.classList.add('skip-tyr-loader');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
+    <!-- Cosmic Loading Screen -->
+    <div id="tyrLoader" class="tyr-loader" aria-hidden="true">
+      <div class="tyr-loader__backdrop">
+        <div class="tyr-loader__glow"></div>
+      </div>
+      <div class="tyr-loader__content">
+        <div class="tyr-loader__logo-wrap">
+          <span class="tyr-loader__logo">
+            <span class="tyr-word"><span class="tyr-letter">T</span></span><span class="tyr-space">&nbsp;</span><span class="tyr-word"><span class="tyr-letter">Y</span></span><span class="tyr-space">&nbsp;</span><span class="tyr-word"><span class="tyr-letter">R</span></span>
+          </span>
+        </div>
+        <div class="tyr-loader__bar">
+          <div class="tyr-loader__progress"></div>
+        </div>
+      </div>
+    </div>
+
     <main class="hub">
       <header class="hero">
-        <span class="hero__label">Una suite de pequeños universos</span>
-        <h1 class="hero__title">TYR</h1>
-        <p class="hero__subtitle">
-          Cada rincón de aquí guarda un pedazo de nuestra historia.
-          Elige un universo y vuelve a sentirlo.
-        </p>
+        <h1 class="hero__title hero__title--interactive" role="button" tabindex="0" aria-label="TYR - Toca para desplegar Thania Y Rodrigo" title="Toca para descubrir el significado">
+          <span class="tyr-word"><span class="tyr-letter">T</span><span class="tyr-expansion">hania</span></span><span class="tyr-space">&nbsp;</span><span class="tyr-word"><span class="tyr-letter">Y</span></span><span class="tyr-space">&nbsp;</span><span class="tyr-word"><span class="tyr-letter">R</span><span class="tyr-expansion">odrigo</span></span>
+        </h1>
       </header>
 
-      <section class="cards" aria-label="Experiencias">
-        <a class="card card--puzzle" href="./puzzle/">
-          <span class="card__emoji" aria-hidden="true">🧩</span>
-          <h2 class="card__title">Nuestro puzzle</h2>
-          <p class="card__text">Arma los recuerdos y descubre la carta que te espera al final.</p>
-        </a>
-        <a class="card card--cumple" href="./cumple/">
-          <span class="card__emoji" aria-hidden="true">🎟️</span>
-          <h2 class="card__title">Golden Tickets</h2>
-          <p class="card__text">Rasca tus seis premios y canjéalos cuando quieras.</p>
-        </a>
-        <a class="card card--historia" href="./historia/">
-          <span class="card__emoji" aria-hidden="true">🚀</span>
-          <h2 class="card__title">Nuestra historia</h2>
-          <p class="card__text">El astronauta solitario, su astronauta y el tiempo que se detuvo.</p>
-        </a>
-        <a class="card card--morpag" href="./morpag/">
-          <span class="card__emoji" aria-hidden="true">💌</span>
-          <h2 class="card__title">Códigos secretos</h2>
-          <p class="card__text">¿Recuerdas los códigos? Hay una sorpresa escondida tras ellos.</p>
-        </a>
+      <section class="solar-system" aria-label="Universos planetarios">
+        <div class="solar-system__stage" tabindex="0" aria-label="Constelación 3D de mundos. Arrastra para orientar la vista o toca un planeta.">
+        </div>
+
+        <!-- Planet preview modal card -->
+        <div class="planet-preview" aria-hidden="true" role="dialog" aria-modal="true">
+          <div class="planet-preview__backdrop"></div>
+          <div class="planet-preview__card">
+            <button class="planet-preview__close" type="button" aria-label="Cerrar vista previa">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            <div class="planet-preview__content">
+              <div class="planet-preview__icon-sphere"></div>
+              <div class="planet-preview__info">
+                <div class="planet-preview__titles">
+                  <span class="planet-preview__tag"></span>
+                  <h2 class="planet-preview__title"></h2>
+                </div>
+                <p class="planet-preview__desc"></p>
+              </div>
+            </div>
+            <div class="planet-preview__actions">
+              <a class="planet-preview__cta" href="#" tabindex="0">
+                <span>Entrar al universo</span>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
       </section>
 
       <footer class="hub__footer">

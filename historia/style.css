@@ -1,58 +1,835 @@
-body {
-    background-color: #111111;
-    font-family: var(--font-body);
-    color: #f0f0f0;
-    margin: 0;
-    overflow-x: hidden;
-    line-height: 1.6;
+:root {
+    --historia-bg: #070407;
+    --historia-card-bg: rgba(22, 14, 18, 0.82);
+    --historia-border: rgba(237, 220, 210, 0.16);
+    --historia-border-glow: rgba(209, 73, 91, 0.35);
+    --historia-gold: #e5b95c;
+    --historia-accent: #d1495b;
+    --historia-accent-soft: #ff9aa8;
+    --historia-text: #f3e8e2;
+    --historia-muted: #b59f97;
 }
 
+body {
+    background-color: var(--historia-bg);
+    font-family: var(--font-body);
+    color: var(--historia-text);
+    margin: 0;
+    overflow-x: hidden;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    transition: background-color 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dynamic background thematization per narrative act */
+body[data-active-theme="solitude"] {
+    --historia-bg: #090509;
+}
+body[data-active-theme="darkness"] {
+    --historia-bg: #030206;
+}
+body[data-active-theme="darkness"] .space-ambient {
+    opacity: 0.18;
+    filter: brightness(0.65);
+}
+body[data-active-theme="horizon"] {
+    --historia-bg: #0b0512;
+}
+body[data-active-theme="horizon"] .space-ambient__glow--1 {
+    background: radial-gradient(circle, rgba(147, 51, 234, 0.45) 0%, transparent 70%);
+}
+body[data-active-theme="arrival"] {
+    --historia-bg: #11050a;
+}
+body[data-active-theme="arrival"] .space-ambient__glow--1 {
+    background: radial-gradient(circle, rgba(225, 29, 72, 0.42) 0%, transparent 70%);
+}
+body[data-active-theme="connection"] {
+    --historia-bg: #120905;
+}
+body[data-active-theme="connection"] .space-ambient__glow--2 {
+    background: radial-gradient(circle, rgba(229, 185, 92, 0.45) 0%, transparent 70%);
+}
+body[data-active-theme="multiverse"] {
+    --historia-bg: #0c0510;
+}
+body[data-active-theme="eternity"] {
+    --historia-bg: #050305;
+}
+
+/* Ambient cosmic glows and nebula backdrop */
+.space-ambient {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    transition: opacity 1.2s ease, filter 1.2s ease;
+}
+
+.space-ambient__glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.24;
+    will-change: transform, opacity;
+    transition: background 1.5s ease, opacity 1.5s ease;
+}
+
+.space-ambient__glow--1 {
+    width: 680px;
+    height: 680px;
+    background: radial-gradient(circle, rgba(209, 73, 91, 0.45) 0%, transparent 70%);
+    top: -100px;
+    left: -150px;
+    animation: ambientFloat1 18s ease-in-out infinite alternate;
+}
+
+.space-ambient__glow--2 {
+    width: 760px;
+    height: 760px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.28) 0%, transparent 70%);
+    bottom: -150px;
+    right: -150px;
+    animation: ambientFloat2 22s ease-in-out infinite alternate;
+}
+
+@keyframes ambientFloat1 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(80px, 120px) scale(1.15); }
+}
+
+@keyframes ambientFloat2 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-100px, -90px) scale(1.12); }
+}
+
+/* Back button */
+.suite-btn--corner {
+    position: fixed;
+    top: var(--space-4);
+    left: var(--space-4);
+    z-index: 100;
+    background: rgba(22, 14, 18, 0.8);
+    border: 1px solid var(--historia-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--historia-text);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
+    transition: transform var(--duration-fast) var(--ease-spring),
+                background var(--duration-fast),
+                border-color var(--duration-fast),
+                color var(--duration-fast);
+}
+
+.suite-btn--corner:hover {
+    background: var(--historia-accent);
+    border-color: var(--historia-accent);
+    color: #fff;
+    transform: scale(1.08);
+}
+
+/* Parallax introductory sections (Act 1 & 2) */
 .parallax-section {
     position: relative;
     height: 100vh;
+    min-height: 580px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    z-index: 1;
 }
 
 .parallax-bg {
     position: absolute;
-    inset: -15% 0;
+    inset: -20% 0;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     will-change: transform;
+    filter: brightness(0.85) contrast(1.08);
+    transform: translateY(0);
+    transition: filter 1s ease;
 }
 
+/* Act 1: Cinematic floating astronaut and breathing effect */
+.parallax-bg--astronaut {
+    animation: astronautFloat 16s ease-in-out infinite alternate;
+    transform-origin: center right;
+}
+
+@keyframes astronautFloat {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+        filter: brightness(0.88) contrast(1.08);
+    }
+    50% {
+        transform: translate3d(-10px, -14px, 0) scale(1.035) rotate(-0.5deg);
+        filter: brightness(0.94) contrast(1.12);
+    }
+    100% {
+        transform: translate3d(8px, -6px, 0) scale(1.02) rotate(0.4deg);
+        filter: brightness(0.88) contrast(1.08);
+    }
+}
+
+/* Cosmic stardust floating particles */
+.stardust-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+}
+
+/* Pulsating golden amber reflection on the helmet visor */
+.visor-reflection {
+    position: absolute;
+    top: 24%;
+    right: 22%;
+    width: 38vw;
+    height: 38vw;
+    max-width: 460px;
+    max-height: 460px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 45% 45%, rgba(255, 154, 86, 0.28) 0%, rgba(229, 185, 92, 0.16) 40%, transparent 70%);
+    filter: blur(35px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 1;
+    animation: visorPulse 7s ease-in-out infinite alternate;
+}
+
+@keyframes visorPulse {
+    0% {
+        opacity: 0.35;
+        transform: scale(0.95) translate(0, 0);
+    }
+    50% {
+        opacity: 0.65;
+        transform: scale(1.08) translate(-6px, -4px);
+        filter: blur(30px);
+    }
+    100% {
+        opacity: 0.4;
+        transform: scale(1) translate(4px, 2px);
+    }
+}
+
+.parallax-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at center, rgba(12, 8, 11, 0.25) 0%, rgba(7, 4, 7, 0.85) 85%),
+        linear-gradient(to bottom, rgba(7, 4, 7, 0.6) 0%, transparent 25%, transparent 75%, rgba(7, 4, 7, 0.98) 100%);
+    pointer-events: none;
+    transition: opacity 1s ease;
+}
+
+/* Act 2: Deep cosmic starry background theme */
+.parallax-section--darkness .parallax-bg {
+    filter: brightness(0.7) contrast(1.3);
+}
+
+.starfield-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+}
+
+.parallax-overlay--deep {
+    background:
+        radial-gradient(circle at center, rgba(3, 2, 6, 0.2) 0%, rgba(3, 2, 6, 0.65) 75%, #030206 100%),
+        linear-gradient(to bottom, rgba(7, 4, 7, 0.8) 0%, transparent 20%, transparent 80%, rgba(11, 5, 18, 0.9) 100%);
+}
+
+/* Content text styling - Seamless cosmic floating typography without rigid card containers */
 .content {
     position: relative;
-    z-index: var(--z-base);
-    background: rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     padding: var(--space-4) var(--space-6);
-    border-radius: var(--radius-sm);
-    font-size: clamp(1.1rem, 3vw, 2rem);
-    max-width: 850px;
+    max-width: 860px;
     text-align: center;
-    margin: var(--space-4);
+    margin: var(--space-6) auto;
 }
 
+.content--darkness {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.content p {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 3.6vw, 2.35rem);
+    font-weight: 400;
+    line-height: 1.6;
+    color: #ffffff;
+    margin: 0;
+    text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95),
+                 0 2px 10px rgba(0, 0, 0, 0.8),
+                 0 0 40px rgba(0, 0, 0, 0.7);
+}
+
+/* Atmospheric cosmic nebula backdrops per act */
+.act-nebula {
+    position: absolute;
+    inset: -10% -15%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(80px);
+    opacity: 0.55;
+    will-change: transform, opacity;
+}
+
+.act-nebula--horizon {
+    background:
+        radial-gradient(ellipse at 30% 40%, rgba(147, 51, 234, 0.45) 0%, transparent 65%),
+        radial-gradient(circle at 75% 65%, rgba(59, 130, 246, 0.35) 0%, transparent 60%),
+        radial-gradient(circle at 50% 20%, rgba(216, 180, 254, 0.25) 0%, transparent 50%);
+    animation: nebulaDrift1 22s ease-in-out infinite alternate;
+}
+
+.act-nebula--arrival {
+    background:
+        radial-gradient(ellipse at 65% 45%, rgba(225, 29, 72, 0.45) 0%, transparent 65%),
+        radial-gradient(circle at 25% 60%, rgba(251, 146, 60, 0.3) 0%, transparent 60%),
+        radial-gradient(circle at 50% 80%, rgba(244, 63, 94, 0.25) 0%, transparent 55%);
+    animation: nebulaDrift2 25s ease-in-out infinite alternate;
+}
+
+.act-nebula--connection {
+    background:
+        radial-gradient(ellipse at 50% 40%, rgba(245, 158, 11, 0.38) 0%, transparent 65%),
+        radial-gradient(circle at 30% 60%, rgba(225, 29, 72, 0.32) 0%, transparent 60%),
+        radial-gradient(circle at 70% 30%, rgba(234, 179, 8, 0.28) 0%, transparent 55%),
+        radial-gradient(circle at 50% 80%, rgba(217, 70, 239, 0.2) 0%, transparent 50%);
+    animation: nebulaDrift3 26s ease-in-out infinite alternate;
+}
+
+@keyframes nebulaDrift1 {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+    50% { transform: scale(1.1) translate(25px, -15px); opacity: 0.7; }
+    100% { transform: scale(0.98) translate(-20px, 10px); opacity: 0.55; }
+}
+
+@keyframes nebulaDrift2 {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+    50% { transform: scale(1.08) translate(-30px, 20px); opacity: 0.72; }
+    100% { transform: scale(0.96) translate(15px, -10px); opacity: 0.55; }
+}
+
+@keyframes nebulaDrift3 {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.55; }
+    50% { transform: scale(1.12) translate(20px, -25px); opacity: 0.8; }
+    100% { transform: scale(0.96) translate(-15px, 15px); opacity: 0.6; }
+}
+
+/* Act 3: Event Horizon Gravitational Singularity */
+.story-section--horizon {
+    position: relative;
+    overflow: visible;
+}
+
+.vortex-canvas-full {
+    position: absolute;
+    inset: -20% -30%;
+    width: 160%;
+    height: 140%;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: screen;
+}
+
+/* Act 4 full-bleed starfield and quantum stardust canvas */
+.arrival-canvas-full {
+    position: absolute;
+    inset: -15% -20%;
+    width: 140%;
+    height: 130%;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: screen;
+}
+
+/* Act 5 cosmic connection and star ignition canvas */
+.connection-canvas-full {
+    position: absolute;
+    inset: -15% -20%;
+    width: 140%;
+    height: 130%;
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: screen;
+}
+
+.story-frame--singularity {
+    position: relative;
+    z-index: 1;
+}
+
+.singularity-img {
+    display: block;
+    width: 100%;
+    border-radius: 50%;
+    border: none !important;
+    outline: none !important;
+    animation: singularityBreath 10s ease-in-out infinite alternate;
+    transform-origin: 50% 28%;
+    box-shadow: none;
+    -webkit-mask-image: radial-gradient(circle at 50% 28%, #000000 35%, rgba(0, 0, 0, 0.95) 55%, rgba(0, 0, 0, 0.4) 75%, transparent 92%);
+    mask-image: radial-gradient(circle at 50% 28%, #000000 35%, rgba(0, 0, 0, 0.95) 55%, rgba(0, 0, 0, 0.4) 75%, transparent 92%);
+}
+
+@keyframes singularityBreath {
+    0% {
+        transform: scale(1);
+        filter: brightness(1) contrast(1.08) drop-shadow(0 0 35px rgba(147, 51, 234, 0.45));
+    }
+    50% {
+        transform: scale(1.04) translate(0, -3px);
+        filter: brightness(1.2) contrast(1.22) drop-shadow(0 0 60px rgba(168, 85, 247, 0.85));
+    }
+    100% {
+        transform: scale(1.01) translate(0, 2px);
+        filter: brightness(1.05) contrast(1.12) drop-shadow(0 0 40px rgba(59, 130, 246, 0.5));
+    }
+}
+
+/* Gravitational lens pulsating light around accretion disk */
+.event-horizon-lens {
+    position: absolute;
+    top: 27%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(216, 180, 254, 0.85) 25%, rgba(147, 51, 234, 0.5) 50%, rgba(59, 130, 246, 0.25) 70%, transparent 80%);
+    filter: blur(28px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 3;
+    animation: accretionGlow 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes accretionGlow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.85);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+        filter: blur(22px);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.95);
+        opacity: 0.75;
+    }
+}
+
+/* Spinning accretion energy rings around the event horizon */
+.accretion-ring {
+    position: absolute;
+    top: 27%;
+    left: 50%;
+    border-radius: 50%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    z-index: 2;
+}
+
+.accretion-ring--outer {
+    width: 380px;
+    height: 130px;
+    transform: translate(-50%, -50%) rotate(-6deg);
+    border: 2.5px solid rgba(216, 180, 254, 0.75);
+    box-shadow: 0 0 45px rgba(168, 85, 247, 0.95), inset 0 0 35px rgba(255, 255, 255, 0.9);
+    animation: ringWarpOuter 8s linear infinite;
+}
+
+.accretion-ring--inner {
+    width: 300px;
+    height: 100px;
+    transform: translate(-50%, -50%) rotate(4deg);
+    border: 2px dashed rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 35px rgba(232, 121, 249, 1);
+    animation: ringWarpInner 6s linear infinite reverse;
+}
+
+@keyframes ringWarpOuter {
+    0% { transform: translate(-50%, -50%) rotate(-6deg) scale(0.96); opacity: 0.75; }
+    50% { transform: translate(-50%, -50%) rotate(-2deg) scale(1.08); opacity: 1; }
+    100% { transform: translate(-50%, -50%) rotate(-6deg) scale(0.96); opacity: 0.75; }
+}
+
+@keyframes ringWarpInner {
+    0% { transform: translate(-50%, -50%) rotate(4deg) scale(1.06); opacity: 0.95; }
+    50% { transform: translate(-50%, -50%) rotate(10deg) scale(0.92); opacity: 0.65; }
+    100% { transform: translate(-50%, -50%) rotate(4deg) scale(1.06); opacity: 0.95; }
+}
+
+/* Story sections (Acts 3, 4, 5) without rigid containers - Seamless floating aesthetic */
 .story-section {
-    background: #222222;
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-6);
-    padding: var(--space-6);
-    min-height: 100vh;
+    gap: var(--space-12);
+    padding: var(--space-14) var(--space-8);
+    min-height: 92vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
-.story-section img {
-    max-height: 80vh;
-    max-width: 100%;
-    border-radius: var(--radius-md);
-    flex: 1 1 45%;
-    object-fit: contain;
+.story-section--reverse {
+    flex-direction: row-reverse;
+}
+
+.story-frame {
+    position: relative;
+    flex: 1 1 50%;
+    max-width: 540px;
+    border-radius: var(--radius-xl);
+    overflow: visible;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.story-frame:hover {
+    transform: translateY(-6px) scale(1.02);
+}
+
+.story-frame img {
+    display: block;
+    width: 100%;
+    max-height: 65vh;
+    object-fit: cover;
+    border-radius: var(--radius-xl);
+    transition: transform 0.8s ease-out, box-shadow 0.6s ease-out;
+}
+
+
+/* Contextual ambient glowing halos directly behind the images */
+.story-frame__glow {
+    position: absolute;
+    inset: -15px;
+    border-radius: calc(var(--radius-xl) + 12px);
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(35px);
+    opacity: 0.75;
+    transition: opacity 0.6s ease;
+}
+
+.story-frame__glow--purple {
+    background: radial-gradient(circle, rgba(147, 51, 234, 0.65) 0%, rgba(99, 102, 241, 0.3) 50%, transparent 75%);
+}
+
+.story-frame__glow--rose {
+    background: radial-gradient(circle, rgba(225, 29, 72, 0.65) 0%, rgba(244, 63, 94, 0.3) 50%, transparent 75%);
+}
+
+.story-frame__glow--gold {
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.65) 0%, rgba(245, 158, 11, 0.3) 50%, transparent 75%);
+}
+
+.story-frame:hover img {
+    transform: scale(1.03);
+}
+
+/* Act 4: The Arrival - Quantum Contact & Dimensional Rift */
+.story-frame--arrival {
+    position: relative;
+}
+
+.arrival-img {
+    animation: arrivalFloat 12s ease-in-out infinite alternate;
+    transform-origin: center center;
+}
+
+@keyframes arrivalFloat {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(6px, -8px, 0) scale(1.025);
+    }
+    100% {
+        transform: translate3d(-4px, 4px, 0) scale(1.01);
+    }
+}
+
+/* Radiant quantum spark where the hands almost meet (X: 47%, Y: 52%) */
+.contact-sparkle {
+    position: absolute;
+    top: 51.5%;
+    left: 46.5%;
+    width: 32px;
+    height: 32px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, rgba(255, 230, 240, 0.95) 25%, rgba(244, 63, 94, 0.8) 55%, transparent 75%);
+    filter: blur(2px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 3;
+    animation: contactPulse 2.8s ease-in-out infinite alternate;
+}
+
+.contact-ray {
+    position: absolute;
+    top: 51.5%;
+    left: 46.5%;
+    width: 140px;
+    height: 140px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(225, 29, 72, 0.45) 40%, transparent 70%);
+    filter: blur(18px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 2;
+    animation: contactGlow 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes contactPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.65);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.4);
+        opacity: 1;
+        filter: blur(1px);
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.9), 0 0 50px rgba(244, 63, 94, 0.85);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.85);
+        opacity: 0.75;
+    }
+}
+
+@keyframes contactGlow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.4;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.25);
+        opacity: 0.85;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.5;
+    }
+}
+
+/* Warm dimensional rift energy wave behind the emerging astronaut */
+.dimensional-rift {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    width: 60%;
+    height: 85%;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    background: radial-gradient(ellipse at center, rgba(251, 146, 60, 0.28) 0%, rgba(225, 29, 72, 0.18) 50%, transparent 75%);
+    filter: blur(30px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 1;
+    animation: riftShimmer 8s ease-in-out infinite alternate;
+}
+
+@keyframes riftShimmer {
+    0% {
+        transform: scale(0.95) rotate(-2deg);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.08) rotate(3deg);
+        opacity: 0.85;
+        filter: blur(25px);
+    }
+    100% {
+        transform: scale(0.98) rotate(-1deg);
+        opacity: 0.6;
+    }
+}
+
+/* Act 5: Love is Born - Star Ignition & Celestial Embrace */
+.story-frame--connection {
+    position: relative;
+}
+
+.connection-img {
+    animation: connectionFloat 13s ease-in-out infinite alternate;
+    transform-origin: 52% 40%;
+    -webkit-mask-image: radial-gradient(ellipse 95% 95% at 50% 50%, #000000 68%, rgba(0, 0, 0, 0.9) 82%, transparent 100%);
+    mask-image: radial-gradient(ellipse 95% 95% at 50% 50%, #000000 68%, rgba(0, 0, 0, 0.9) 82%, transparent 100%);
+}
+
+@keyframes connectionFloat {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    }
+    50% {
+        transform: translate3d(-5px, -10px, 0) scale(1.025) rotate(-0.5deg);
+    }
+    100% {
+        transform: translate3d(6px, 5px, 0) scale(1.01) rotate(0.4deg);
+    }
+}
+
+/* Star birth radiant core pulsating at the contact point (~52% X, ~35% Y) */
+.star-birth-flare {
+    position: absolute;
+    top: 35%;
+    left: 52%;
+    width: 60px;
+    height: 60px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, rgba(254, 240, 138, 0.95) 25%, rgba(245, 158, 11, 0.75) 55%, transparent 75%);
+    filter: blur(3px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 3;
+    animation: starFlarePulse 3.2s ease-in-out infinite alternate;
+}
+
+.star-birth-core {
+    position: absolute;
+    top: 35%;
+    left: 52%;
+    width: 14px;
+    height: 14px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 16px #ffffff, 0 0 32px #fde047, 0 0 54px #f59e0b;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 4;
+    animation: starCoreSpark 2.4s ease-in-out infinite alternate;
+}
+
+/* Multidirectional diamond light diffraction spikes emanating from newborn star */
+.star-birth-ray {
+    position: absolute;
+    top: 35%;
+    left: 52%;
+    border-radius: 50%;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    z-index: 3;
+}
+
+.star-birth-ray--h {
+    width: 240px;
+    height: 4px;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(90deg, transparent 0%, rgba(254, 240, 138, 0.85) 45%, #ffffff 50%, rgba(254, 240, 138, 0.85) 55%, transparent 100%);
+    filter: blur(1px);
+    animation: rayPulseH 3.2s ease-in-out infinite alternate;
+}
+
+.star-birth-ray--v {
+    width: 4px;
+    height: 240px;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(180deg, transparent 0%, rgba(254, 240, 138, 0.85) 45%, #ffffff 50%, rgba(254, 240, 138, 0.85) 55%, transparent 100%);
+    filter: blur(1px);
+    animation: rayPulseV 3.2s ease-in-out infinite alternate;
+}
+
+.star-birth-ray--d1 {
+    width: 150px;
+    height: 3px;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+    filter: blur(1.5px);
+    animation: rayPulseD 4s ease-in-out infinite alternate;
+}
+
+.star-birth-ray--d2 {
+    width: 150px;
+    height: 3px;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%);
+    filter: blur(1.5px);
+    animation: rayPulseD 4s ease-in-out infinite alternate reverse;
+}
+
+/* Warm cosmic birth halo illuminating their faces and broken helmets */
+.star-birth-halo {
+    position: absolute;
+    top: 35%;
+    left: 52%;
+    width: 280px;
+    height: 280px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(253, 224, 71, 0.45) 0%, rgba(245, 158, 11, 0.25) 35%, rgba(225, 29, 72, 0.15) 60%, transparent 75%);
+    filter: blur(28px);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 2;
+    animation: haloBreathe 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes starFlarePulse {
+    0% { transform: translate(-50%, -50%) scale(0.75); opacity: 0.7; }
+    50% { transform: translate(-50%, -50%) scale(1.35); opacity: 1; filter: blur(2px); }
+    100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.8; }
+}
+
+@keyframes starCoreSpark {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.85; }
+    50% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; box-shadow: 0 0 24px #ffffff, 0 0 45px #fde047, 0 0 75px #f59e0b; }
+    100% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.9; }
+}
+
+@keyframes rayPulseH {
+    0% { transform: translate(-50%, -50%) scaleX(0.7); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scaleX(1.3); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scaleX(0.85); opacity: 0.7; }
+}
+
+@keyframes rayPulseV {
+    0% { transform: translate(-50%, -50%) scaleY(0.7); opacity: 0.6; }
+    50% { transform: translate(-50%, -50%) scaleY(1.3); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scaleY(0.85); opacity: 0.7; }
+}
+
+@keyframes rayPulseD {
+    0% { opacity: 0.35; transform: translate(-50%, -50%) rotate(45deg) scale(0.8); }
+    50% { opacity: 0.95; transform: translate(-50%, -50%) rotate(45deg) scale(1.2); }
+    100% { opacity: 0.5; transform: translate(-50%, -50%) rotate(45deg) scale(0.9); }
+}
+
+@keyframes haloBreathe {
+    0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.85; }
+    100% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
 }
 
 .story-section .texto {
@@ -60,30 +837,33 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-size: 1.5rem;
+    max-width: 520px;
 }
 
 .story-section h2 {
     font-family: var(--font-display);
-    color: var(--color-accent-soft);
-    font-size: clamp(1.4rem, 3.5vw, 2.2rem);
-    margin-bottom: var(--space-3);
-    line-height: 1.3;
+    color: #ffffff;
+    font-size: clamp(1.85rem, 3.8vw, 2.75rem);
+    font-weight: 400;
+    line-height: 1.25;
+    margin: 0 0 var(--space-4);
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
 }
 
 .story-section p {
-    font-size: clamp(1rem, 2.5vw, 1.35rem);
-    color: #d8d8d8;
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+    color: var(--historia-text);
+    font-weight: 300;
+    line-height: 1.75;
+    margin: 0;
+    opacity: 0.92;
 }
 
-#img4 {
-    flex-direction: row-reverse;
-}
-
+/* MultiScroll section (Act 6: Cosmic trip) */
 #multiScroll {
-    height: 150vh;
     position: relative;
-    margin-top: -150px;
+    height: 260vh;
+    z-index: 1;
 }
 
 .sticky-container {
@@ -91,119 +871,516 @@ body {
     top: 0;
     height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: var(--space-6) var(--space-4);
+    box-sizing: border-box;
+    overflow: hidden;
+    background: radial-gradient(circle at center, rgba(38, 18, 28, 0.5) 0%, rgba(7, 4, 7, 0.96) 80%);
+}
+
+.multiscroll-header {
+    text-align: center;
+    margin-bottom: var(--space-6);
+    z-index: 2;
+}
+
+.multiscroll-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3.6vw, 2.6rem);
+    font-weight: 400;
+    color: #fff;
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 22px rgba(209, 73, 91, 0.35);
 }
 
 .images {
     display: flex;
     gap: var(--space-6);
-    max-width: 95%;
-    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 1240px;
     justify-content: center;
+    align-items: stretch;
+    z-index: 2;
 }
 
 .item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-width: 250px;
-    opacity: 0;
-    transform: scale(0.8);
-    transition: opacity 0.8s ease, transform 0.8s ease;
+    flex: 1 1 240px;
+    max-width: 280px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    box-sizing: border-box;
+    opacity: 0.15;
+    transform: translateY(34px) scale(0.92);
+    filter: blur(4px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 0.65s ease-out;
 }
 
 .item.visible {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+}
+
+.item__frame {
+    width: 100%;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    margin-bottom: var(--space-4);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8),
+                0 0 30px rgba(209, 73, 91, 0.25);
+    border: 1px solid rgba(237, 220, 210, 0.16);
 }
 
 .item img {
-    max-height: 50vh;
-    max-width: 100%;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-soft);
-    margin-bottom: var(--space-3);
+    display: block;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    transition: transform 0.6s ease-out;
+}
+
+.item.visible:hover img {
+    transform: scale(1.06);
 }
 
 .item p {
-    background: rgba(0, 0, 0, 0.5);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-sm);
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-weight: 300;
+    line-height: 1.5;
     text-align: center;
+    color: var(--historia-text);
+    margin: 0;
+    padding: 6px 8px;
+    opacity: 0.95;
 }
 
+/* Multiscroll timeline progress bar */
+.multiscroll-progress {
+    width: 200px;
+    height: 5px;
+    background: rgba(237, 220, 210, 0.12);
+    border-radius: var(--radius-pill);
+    margin-top: var(--space-8);
+    overflow: hidden;
+}
+
+.multiscroll-progress__fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--historia-gold), var(--historia-accent));
+    border-radius: var(--radius-pill);
+    transition: width 0.15s ease-out;
+    box-shadow: 0 0 12px var(--historia-accent);
+}
+
+/* Final Act: Luxury Eternity Monument Timer */
 #contador {
-    background: #111111;
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 40vh;
-    padding: var(--space-6);
+    min-height: 90vh;
+    padding: var(--space-16) var(--space-4) var(--space-20);
+    box-sizing: border-box;
+    background: linear-gradient(to bottom, transparent 0%, rgba(7, 4, 7, 0.95) 25%, #050305 100%);
 }
 
-.contador-box {
-    background: rgba(0, 0, 0, 0.6);
-    padding: var(--space-4) var(--space-6);
-    border-radius: var(--radius-md);
-    font-size: 1.3rem;
-    box-shadow: var(--shadow-soft);
+.eternity-monument {
+    position: relative;
+    background: rgba(24, 15, 20, 0.88);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    padding: 48px 44px 40px;
+    border-radius: 36px;
+    border: 1px solid rgba(237, 220, 210, 0.18);
+    border-top: 1px solid rgba(255, 255, 255, 0.32);
+    box-shadow: 0 35px 90px rgba(0, 0, 0, 0.9),
+                0 0 65px rgba(209, 73, 91, 0.28);
     text-align: center;
-    max-width: 90%;
+    max-width: 820px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
-.contador-box h2 {
-    font-family: var(--font-script);
-    color: var(--color-gold);
-    font-size: clamp(1.5rem, 4vw, 2.2rem);
-    margin-bottom: var(--space-3);
+.eternity-monument__rings {
+    position: absolute;
+    inset: -60px;
+    pointer-events: none;
+    overflow: hidden;
 }
 
-#tiempoJuntos {
-    font-size: clamp(1rem, 3vw, 1.6rem);
-    font-weight: bold;
-    color: #ff8fa3;
+.eternity-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px dashed rgba(237, 220, 210, 0.08);
 }
 
-@media (max-width: 768px) {
+.eternity-ring--1 {
+    width: 420px;
+    height: 420px;
+    top: -120px;
+    right: -100px;
+    animation: ringSpin 60s linear infinite;
+}
+
+.eternity-ring--2 {
+    width: 500px;
+    height: 500px;
+    bottom: -150px;
+    left: -120px;
+    animation: ringSpin 80s linear infinite reverse;
+}
+
+@keyframes ringSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.eternity-monument__header {
+    position: relative;
+    z-index: 2;
+    margin-bottom: var(--space-8);
+}
+
+.eternity-pretitle {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--historia-gold);
+    margin-bottom: var(--space-2);
+}
+
+.eternity-title {
+    font-family: var(--font-display);
+    color: #ffffff;
+    font-size: clamp(2.1rem, 4.8vw, 3.2rem);
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.2;
+    text-shadow: 0 2px 24px rgba(209, 73, 91, 0.45);
+}
+
+.contador-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+}
+
+.contador-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 22px 14px;
+    background: rgba(14, 9, 12, 0.78);
+    border: 1px solid rgba(237, 220, 210, 0.14);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-lg);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.65), 0 8px 24px rgba(0, 0, 0, 0.4);
+    transition: transform var(--duration-fast) var(--ease-spring),
+                border-color var(--duration-fast),
+                box-shadow var(--duration-fast);
+}
+
+.contador-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(209, 73, 91, 0.5);
+    box-shadow: inset 0 0 24px rgba(209, 73, 91, 0.2), 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.contador-num {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+    font-weight: 400;
+    color: var(--historia-accent-soft);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 20px rgba(209, 73, 91, 0.7);
+}
+
+.contador-unit {
+    font-size: 0.74rem;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    color: var(--historia-muted);
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+.eternity-monument__footer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.eternity-orbit-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--historia-gold);
+    box-shadow: 0 0 12px var(--historia-gold);
+}
+
+.contador-subtext {
+    font-size: 0.96rem;
+    font-weight: 300;
+    color: var(--historia-muted);
+    letter-spacing: 0.6px;
+    margin: 0;
+}
+
+/* Scroll reveal helper styles */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsiveness & Mobile Experience Polish */
+@media (max-width: 900px) {
     .story-section {
         flex-direction: column !important;
-        padding: var(--space-6) var(--space-4);
-        gap: var(--space-4);
+        padding: var(--space-12) var(--space-5);
+        gap: var(--space-8);
         text-align: center;
+        min-height: auto;
     }
 
-    .story-section img {
-        max-height: 50vh;
+    .story-section--reverse {
+        flex-direction: column !important;
     }
 
-    .images {
-        flex-wrap: wrap;
-        gap: var(--space-4);
+    .story-frame {
+        max-width: 100%;
+        width: 100%;
+        order: 1;
     }
 
-    .item {
-        max-width: 200px;
+    .story-frame img {
+        max-height: 52vh;
+        margin: 0 auto;
     }
-}
 
-@media (max-width: 480px) {
+    .story-section .texto {
+        max-width: 100%;
+        width: 100%;
+        order: 2;
+        padding: 0 var(--space-2);
+        box-sizing: border-box;
+    }
+
+    .story-section h2 {
+        font-size: clamp(1.6rem, 5.5vw, 2.2rem);
+        margin-bottom: var(--space-3);
+    }
+
+    .story-section p {
+        font-size: clamp(1rem, 3.8vw, 1.15rem);
+        line-height: 1.65;
+    }
+
+    .vortex-canvas-full {
+        inset: -10% -10%;
+        width: 120%;
+        height: 120%;
+    }
+
+    .event-horizon-lens {
+        width: 200px;
+        height: 200px;
+    }
+
+    .accretion-ring--outer {
+        width: 250px;
+        height: 90px;
+    }
+
+    .accretion-ring--inner {
+        width: 190px;
+        height: 65px;
+    }
+
+    .contact-sparkle {
+        width: 26px;
+        height: 26px;
+    }
+
+    .contact-ray {
+        width: 100px;
+        height: 100px;
+    }
+
+    .connection-canvas-full {
+        inset: -10% -10%;
+        width: 120%;
+        height: 120%;
+    }
+
+    .star-birth-flare {
+        width: 44px;
+        height: 44px;
+    }
+
+    .star-birth-core {
+        width: 10px;
+        height: 10px;
+    }
+
+    .star-birth-ray--h {
+        width: 160px;
+    }
+
+    .star-birth-ray--v {
+        height: 160px;
+    }
+
+    .star-birth-ray--d1,
+    .star-birth-ray--d2 {
+        width: 100px;
+    }
+
+    .star-birth-halo {
+        width: 190px;
+        height: 190px;
+    }
+
+    #multiScroll {
+        height: auto;
+    }
+
+    .sticky-container {
+        position: relative;
+        height: auto;
+        padding: var(--space-12) var(--space-4);
+    }
+
     .images {
         flex-direction: column;
         align-items: center;
+        gap: var(--space-8);
     }
 
     .item {
-        max-width: 260px;
+        max-width: 380px;
+        width: 100%;
+        opacity: 1;
+        transform: none;
+        filter: none;
     }
 
     .item img {
-        max-height: 40vh;
+        height: 230px;
     }
 
+    .multiscroll-progress {
+        display: none;
+    }
+
+    #contador {
+        padding: var(--space-12) var(--space-4) var(--space-16);
+        min-height: auto;
+    }
+
+    .eternity-monument {
+        padding: 38px 20px 32px;
+        border-radius: 28px;
+    }
+
+    .eternity-ring--1 {
+        width: 300px;
+        height: 300px;
+        top: -80px;
+        right: -60px;
+    }
+
+    .eternity-ring--2 {
+        width: 360px;
+        height: 360px;
+        bottom: -90px;
+        left: -80px;
+    }
+}
+
+@media (max-width: 600px) {
     .content {
-        font-size: 1.1rem;
-        padding: var(--space-3);
+        padding: var(--space-4) var(--space-3);
+        margin: var(--space-3) auto;
+    }
+
+    .content p {
+        font-size: 1.35rem;
+        line-height: 1.5;
+    }
+
+    .contador-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+        margin-bottom: var(--space-6);
+    }
+
+    .contador-card {
+        padding: 16px 10px;
+    }
+
+    .contador-num {
+        font-size: 2.1rem;
+    }
+
+    .contador-unit {
+        font-size: 0.68rem;
+        letter-spacing: 1.8px;
+    }
+
+    .eternity-title {
+        font-size: 1.75rem;
+    }
+
+    .contador-subtext {
+        font-size: 0.88rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .space-ambient__glow,
+    .parallax-bg,
+    .reveal-on-scroll,
+    .item,
+    .eternity-ring {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+        filter: none !important;
     }
 }

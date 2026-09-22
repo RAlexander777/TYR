@@ -3,6 +3,11 @@ import { resolve } from 'node:path'
 
 export default defineConfig({
   base: './',
+  server: {
+    watch: {
+      ignored: ['**/*~tmp*', '**/*.tmp']
+    }
+  },
   build: {
     rollupOptions: {
       input: {
@@ -13,6 +18,7 @@ export default defineConfig({
         morpage: resolve(__dirname, 'morpag/index.html'),
         morpagFlow: resolve(__dirname, 'morpag/flow/main.html'),
         morpagFlower: resolve(__dirname, 'morpag/flow/flower.html'),
+        girasol: resolve(__dirname, 'girasol/index.html'),
       },
     },
   },

@@ -4,8 +4,10 @@ import '@fontsource/montserrat/500.css';
 import '@fontsource/montserrat/700.css';
 import '../src/styles/tokens.css';
 import '../src/styles/base.css';
+import '../src/styles/space-transition.css';
 import './style.css';
 import { fireConfetti } from '../src/lib/confetti.js';
+import { initSpaceExit } from '../src/lib/space-transition.js';
 
 const STORAGE_KEY = 'golden_tickets_state';
 
@@ -212,3 +214,5 @@ tickets.forEach((ticket, index) => {
     container.appendChild(el);
     initScratch(el.querySelector('.scratch-canvas'), index);
 });
+
+initSpaceExit({ planetId: 'cumple' });

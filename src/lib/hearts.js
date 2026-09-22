@@ -27,11 +27,12 @@ export function spawnBurstHearts(container) {
       const heart = document.createElement('div')
       heart.className = 'floating-heart'
       heart.textContent = '❤️'
-      heart.style.left = `${50 + Math.random() * 40 - 20}%`
-      heart.style.top = '50%'
+      heart.style.left = `${50 + (Math.random() * 40 - 20)}%`
+      heart.style.top = '40%'
+      heart.style.setProperty('--float-x', `${(Math.random() - 0.5) * 120}px`)
       container.appendChild(heart)
       setTimeout(() => heart.remove(), 2000)
-    }, i * 100)
+    }, i * 70)
   }
 }
 

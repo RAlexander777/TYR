@@ -3,8 +3,10 @@ import '@fontsource/playfair-display/600.css'
 import '@fontsource/lato/300.css'
 import '../src/styles/tokens.css'
 import '../src/styles/base.css'
+import '../src/styles/space-transition.css'
 import './style.css'
 import { spawnBurstHearts } from '../src/lib/hearts.js'
+import { initSpaceExit } from '../src/lib/space-transition.js'
 
 const container = document.getElementById('puzzle-container')
 const root = document.documentElement
@@ -366,3 +368,4 @@ window.addEventListener('resize', () => {
 setInterval(createHeart, 800)
 enableLetterDrag()
 init()
+initSpaceExit({ planetId: 'puzzle' })

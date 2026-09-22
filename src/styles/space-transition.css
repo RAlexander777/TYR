@@ -1,0 +1,266 @@
+/* ==========================================================================
+   Space Transition: Planet Departure & Cosmos Arrival Styles
+   ========================================================================== */
+
+/* Exit Button: Celestial Galaxy & Star Cluster Portal */
+.cosmos-exit-btn {
+  position: fixed;
+  top: var(--space-4, 1.25rem);
+  left: var(--space-4, 1.25rem);
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(12, 8, 20, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--planet-exit-color, #ffccd5);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    0 4px 22px rgba(0, 0, 0, 0.6),
+    0 0 16px var(--planet-exit-glow, rgba(209, 73, 91, 0.35));
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease,
+    background 0.35s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overflow: visible;
+}
+
+.cosmos-exit-btn--right {
+  left: auto;
+  right: var(--space-4, 1.25rem);
+}
+
+.cosmos-exit-btn:hover {
+  transform: translateY(-2px) scale(1.12);
+  background: rgba(22, 14, 34, 0.92);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.75),
+    0 0 28px var(--planet-exit-glow, rgba(209, 73, 91, 0.6));
+}
+
+.cosmos-exit-btn:active {
+  transform: scale(0.95);
+}
+
+/* Galaxy & Stardust Portal Inner Elements */
+.cosmos-portal {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.cosmos-portal__nebula {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 45%, var(--planet-exit-glow, rgba(209, 73, 91, 0.45)) 0%, rgba(147, 51, 234, 0.2) 50%, transparent 80%);
+  opacity: 0.75;
+  filter: blur(2px);
+  transition: opacity 0.3s ease;
+}
+
+.cosmos-exit-btn:hover .cosmos-portal__nebula {
+  opacity: 1;
+  filter: blur(1px);
+}
+
+.cosmos-portal__galaxy {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: block;
+}
+
+.cosmos-galaxy-spin {
+  transform-origin: 24px 24px;
+  animation: cosmos-galaxy-rotate 22s linear infinite;
+  transition: animation-duration 0.4s ease;
+}
+
+.cosmos-exit-btn:hover .cosmos-galaxy-spin {
+  animation-duration: 6s;
+}
+
+@keyframes cosmos-galaxy-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cosmos-core-pulse {
+  animation: cosmos-core-breathing 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes cosmos-core-breathing {
+  0% {
+    r: 2.8px;
+    opacity: 0.85;
+  }
+  100% {
+    r: 3.8px;
+    opacity: 1;
+    filter: drop-shadow(0 0 4px #ffffff);
+  }
+}
+
+.cosmos-flare {
+  transform-origin: 24px 24px;
+  animation: cosmos-flare-pulse 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes cosmos-flare-pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.85) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.15) rotate(45deg);
+  }
+}
+
+.cosmos-portal__halo {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  animation: cosmos-halo-rotate 35s linear infinite reverse;
+}
+
+@keyframes cosmos-halo-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Page Departing State: Atmospheric Recede */
+body.is-planet-departing {
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+body.is-planet-departing > *:not(.space-warp-overlay) {
+  transition:
+    transform 0.72s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.72s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.72s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform: scale(0.92) translateY(18px) !important;
+  filter: blur(6px) brightness(0.5) !important;
+  opacity: 0.15 !important;
+}
+
+/* Space Warp Fullscreen Overlay */
+.space-warp-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  pointer-events: none;
+  overflow: hidden;
+  background: transparent;
+}
+
+.space-warp-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.space-warp-shockwave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140px;
+  height: 140px;
+  margin-top: -70px;
+  margin-left: -70px;
+  border-radius: 50%;
+  border: 2px solid var(--planet-exit-color, rgba(255, 200, 220, 0.8));
+  box-shadow: 0 0 40px var(--planet-exit-glow, rgba(209, 73, 91, 0.7));
+  opacity: 0;
+  transform: scale(0.2);
+  animation: warp-shockwave-expand 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes warp-shockwave-expand {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.2);
+  }
+  60% {
+    opacity: 0.6;
+    transform: scale(4.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(8.5);
+  }
+}
+
+.space-warp-veil {
+  position: absolute;
+  inset: 0;
+  background: #050308;
+  opacity: 0;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.space-warp-veil.is-blackout {
+  opacity: 1;
+}
+
+/* Cosmos Arrival Overlay on index.html */
+.space-arrival-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999998;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(14, 10, 24, 0.94) 0%, #050308 100%);
+  opacity: 1;
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.space-arrival-overlay.is-dissipating {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cosmos-galaxy-spin,
+  .cosmos-portal__halo,
+  .cosmos-flare,
+  .cosmos-core-pulse {
+    animation: none !important;
+  }
+  .space-warp-shockwave {
+    display: none;
+  }
+  body.is-planet-departing > *:not(.space-warp-overlay) {
+    transform: none !important;
+    filter: none !important;
+    opacity: 0.5 !important;
+  }
+}

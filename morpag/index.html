@@ -10,13 +10,26 @@
 </head>
 <body>
   <header>
+    <div class="parallax-container" id="parallaxContainer" aria-hidden="true">
+      <div class="parallax-layer parallax-bg" id="parallaxBg"></div>
+      <div class="parallax-layer parallax-ambient-glow"></div>
+      <canvas class="parallax-layer parallax-canvas" id="parallaxCanvas"></canvas>
+      <div class="parallax-layer parallax-vignette"></div>
+    </div>
+
     <nav>
       <div class="logo">THANIA</div>
       <div class="code">
-        <a id="codeBtn" href="#modal" role="button">Códigos</a>
+        <a id="codeBtn" href="#modal" role="button" aria-haspopup="dialog" aria-label="Abrir panel de códigos secretos">
+          <svg class="code-btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 2l-2 2m-1-1l2 2M15 8l2 2m-1-1l2 2M3 21l9-9m0 0l-2-2m2 2l2 2m-2-2a5.5 5.5 0 1 0-7.78-7.78 5.5 5.5 0 0 0 7.78 7.78z" />
+          </svg>
+          <span class="code-btn-text">Códigos</span>
+          <span class="code-btn-shine" aria-hidden="true"></span>
+        </a>
       </div>
     </nav>
-    <a class="suite-btn suite-btn--corner" href="../index.html" aria-label="Volver a la suite TYR">⌂</a>
+    <a class="cosmos-exit-btn cosmos-exit-btn--right" href="../index.html" aria-label="Volver al cosmos" title="Volver al cosmos" data-planet="morpag"></a>
   </header>
 
   <section class="h-text">

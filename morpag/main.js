@@ -3,8 +3,11 @@ import '@fontsource/lato/300.css';
 import '@fontsource/lato/400.css';
 import '../src/styles/tokens.css';
 import '../src/styles/base.css';
+import '../src/styles/space-transition.css';
 import './style.css';
 import { startNeonAnimation } from './neon.js';
+import { initParallax } from './parallax.js';
+import { initSpaceExit } from '../src/lib/space-transition.js';
 
 const phrases = [
   'Tus ojos son mi espejo favorito',
@@ -227,8 +230,8 @@ yesBtn.addEventListener('click', (event) => {
 });
 
 function moveNoButton() {
-  const maxX = window.innerWidth - noBtn.offsetWidth - 20;
-  const maxY = window.innerHeight - noBtn.offsetHeight - 20;
+  const maxX = Math.max(10, window.innerWidth - noBtn.offsetWidth - 20);
+  const maxY = Math.max(10, window.innerHeight - noBtn.offsetHeight - 20);
   noBtn.style.left = `${Math.random() * maxX}px`;
   noBtn.style.top = `${Math.random() * maxY}px`;
 }
@@ -356,15 +359,23 @@ points.forEach((point) => {
   point.addEventListener('click', () => {
     const rect = point.getBoundingClientRect();
     const viewRect = mapView.getBoundingClientRect();
-    const top = rect.bottom - viewRect.top;
     const left = rect.left - viewRect.left + rect.width / 2;
+    let top = rect.bottom - viewRect.top + 8;
+
+    if (top > viewRect.height - 90) {
+      top = Math.max(10, rect.top - viewRect.top - 80);
+    }
+
+    const clampedLeft = Math.max(115, Math.min(viewRect.width - 115, left));
 
     descriptionText.textContent = point.dataset.description;
     descriptionContainer.style.top = `${top}px`;
-    descriptionContainer.style.left = `${left}px`;
+    descriptionContainer.style.left = `${clampedLeft}px`;
     descriptionContainer.style.display = 'block';
   });
 });
 
 updateGreeting();
 changePhrase();
+initParallax();
+initSpaceExit({ planetId: 'morpag' });

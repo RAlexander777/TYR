@@ -9,73 +9,161 @@
     <title>Nuestra historia · TYR</title>
 </head>
 <body>
-    <a class="suite-btn suite-btn--corner" href="../index.html" aria-label="Volver a la suite TYR">⌂</a>
+    <a class="cosmos-exit-btn" href="../index.html" aria-label="Volver al cosmos" title="Volver al cosmos" data-planet="historia"></a>
 
-    <section id="img1" class="parallax-section" aria-label="Introducción">
-        <div class="parallax-bg" style="background-image: url('assets/bg1.webp');" aria-hidden="true"></div>
-        <div class="content">
+    <div class="space-ambient" aria-hidden="true">
+        <div class="space-ambient__glow space-ambient__glow--1"></div>
+        <div class="space-ambient__glow space-ambient__glow--2"></div>
+        <div class="space-ambient__stars"></div>
+    </div>
+
+    <!-- Act 1: Solitude in the Void -->
+    <section id="img1" class="parallax-section parallax-section--start" data-theme="solitude" aria-label="Introducción">
+        <div class="parallax-bg parallax-bg--astronaut" style="background-image: url('assets/bg1.webp');" aria-hidden="true"></div>
+        <canvas id="stardustAct1" class="stardust-canvas" aria-hidden="true"></canvas>
+        <div class="visor-reflection" aria-hidden="true"></div>
+        <div class="parallax-overlay" aria-hidden="true"></div>
+        <div class="content reveal-on-scroll">
             <p>Érase una vez... un astronauta solitario que vagaba por el espacio, sin rumbo, explorando lo desconocido.</p>
         </div>
     </section>
 
-    <section id="img2" class="parallax-section" aria-label="La oscuridad">
+    <!-- Act 2: Wandering in the Dark Void -->
+    <section id="img2" class="parallax-section parallax-section--darkness" data-theme="darkness" aria-label="La oscuridad">
         <div class="parallax-bg" style="background-image: url('assets/bg2.webp');" aria-hidden="true"></div>
-        <div class="content">
-            <p>No tenia idea de lo que había en la basta oscuridad, pero aún así avanzaba, sin objetivo.</p>
+        <canvas id="starfieldAct2" class="starfield-canvas" aria-hidden="true"></canvas>
+        <div class="parallax-overlay parallax-overlay--deep" aria-hidden="true"></div>
+        <div class="content content--darkness reveal-on-scroll">
+            <p>No tenía idea de lo que había en la vasta oscuridad, pero aún así avanzaba, sin objetivo.</p>
         </div>
     </section>
 
-    <section id="img3" class="story-section">
-        <img src="assets/bg3.webp" alt="Un agujero negro se abre frente al astronauta">
+    <!-- Act 3: The Event Horizon -->
+    <section id="img3" class="story-section story-section--horizon reveal-on-scroll" data-theme="horizon">
+        <div class="act-nebula act-nebula--horizon" aria-hidden="true"></div>
+        <canvas id="vortexAct3" class="vortex-canvas-full" aria-hidden="true"></canvas>
+        <div class="story-frame story-frame--singularity">
+            <img src="assets/bg3.webp" alt="Un agujero negro se abre frente al astronauta" loading="lazy" class="singularity-img">
+            <div class="accretion-ring accretion-ring--outer" aria-hidden="true"></div>
+            <div class="accretion-ring accretion-ring--inner" aria-hidden="true"></div>
+            <div class="event-horizon-lens" aria-hidden="true"></div>
+            <div class="story-frame__glow story-frame__glow--purple" aria-hidden="true"></div>
+        </div>
         <div class="texto">
             <h2>Pero de repente...</h2>
             <p>Se abrió un agujero negro frente a él. Se dice que los agujeros negros son puertas a otros universos, o planos dimensionales.</p>
         </div>
     </section>
 
-    <section id="img4" class="story-section">
-        <img src="assets/bg4.webp" alt="Una astronauta emerge del agujero negro">
+    <!-- Act 4: The Arrival -->
+    <section id="img4" class="story-section story-section--reverse story-section--arrival reveal-on-scroll" data-theme="arrival">
+        <div class="act-nebula act-nebula--arrival" aria-hidden="true"></div>
+        <canvas id="particlesAct4" class="arrival-canvas-full" aria-hidden="true"></canvas>
+        <div class="story-frame story-frame--arrival">
+            <img src="assets/bg4.webp" alt="Una astronauta emerge del agujero negro" loading="lazy" class="arrival-img">
+            <div class="contact-sparkle" aria-hidden="true"></div>
+            <div class="contact-ray" aria-hidden="true"></div>
+            <div class="dimensional-rift" aria-hidden="true"></div>
+            <div class="story-frame__glow story-frame__glow--rose" aria-hidden="true"></div>
+        </div>
         <div class="texto">
-            <h2>Del agujero negro apareció, una astronauta..</h2>
+            <h2>Del agujero negro apareció, una astronauta...</h2>
             <p>Que, a la vista del astronauta, era alguien etérea, fuera de todo lo conocido y por conocer.</p>
         </div>
     </section>
 
-    <section id="img5" class="story-section">
-        <img src="assets/bg5.webp" alt="Los dos astronautas flotan juntos en el espacio">
+    <!-- Act 5: Love is Born -->
+    <section id="img5" class="story-section story-section--connection reveal-on-scroll" data-theme="connection">
+        <div class="act-nebula act-nebula--connection" aria-hidden="true"></div>
+        <canvas id="canvasAct5" class="connection-canvas-full" aria-hidden="true"></canvas>
+        <div class="story-frame story-frame--connection">
+            <img src="assets/bg5.webp" alt="Los dos astronautas flotan juntos en el espacio" loading="lazy" class="connection-img">
+            <div class="star-birth-flare" aria-hidden="true"></div>
+            <div class="star-birth-core" aria-hidden="true"></div>
+            <div class="star-birth-ray star-birth-ray--h" aria-hidden="true"></div>
+            <div class="star-birth-ray star-birth-ray--v" aria-hidden="true"></div>
+            <div class="star-birth-ray star-birth-ray--d1" aria-hidden="true"></div>
+            <div class="star-birth-ray star-birth-ray--d2" aria-hidden="true"></div>
+            <div class="star-birth-halo" aria-hidden="true"></div>
+            <div class="story-frame__glow story-frame__glow--gold" aria-hidden="true"></div>
+        </div>
         <div class="texto">
             <h2>Fue una conexión instantánea, se enamoraron perdidamente.</h2>
             <p>El astronauta se entregó completamente a ese ser etéreo, deslumbrante, perfecto a sus ojos. El amor nació como nace una estrella en el universo.</p>
         </div>
     </section>
 
-    <section id="multiScroll" aria-label="A través de los universos">
+    <!-- Act 6: Across All Universes Cinematic Showcase -->
+    <section id="multiScroll" aria-label="A través de los universos" data-theme="multiverse">
         <div class="sticky-container">
+            <div class="multiscroll-header">
+                <h2 class="multiscroll-title">En cada plano del cosmos</h2>
+            </div>
             <div class="images">
                 <div class="item" id="item6">
-                    <img src="assets/bg6.webp" alt="Los astronautas se toman de la mano en el espacio">
+                    <div class="item__frame">
+                        <img src="assets/bg6.webp" alt="Los astronautas se toman de la mano en el espacio" loading="lazy">
+                    </div>
                     <p>Y decidieron compartir sus vidas, su viaje hacia lo desconocido.</p>
                 </div>
                 <div class="item" id="item7">
-                    <img src="assets/bg7.webp" alt="Los astronautas abrazados frente a una nebulosa">
+                    <div class="item__frame">
+                        <img src="assets/bg7.webp" alt="Los astronautas abrazados frente a una nebulosa" loading="lazy">
+                    </div>
                     <p>En todo momento, en todo lugar, en todos los planos, en todo lo atemporal.</p>
                 </div>
                 <div class="item" id="item8">
-                    <img src="assets/bg8.webp" alt="Los astronautas juntos mirando las estrellas">
+                    <div class="item__frame">
+                        <img src="assets/bg8.webp" alt="Los astronautas juntos mirando las estrellas" loading="lazy">
+                    </div>
                     <p>Porque su amor no pertenece a un solo universo, sino a todos los universos y planos existentes y por existir.</p>
                 </div>
                 <div class="item" id="item9">
-                    <img src="assets/bg9.webp" alt="Los astronautas frente a una galaxia brillante">
+                    <div class="item__frame">
+                        <img src="assets/bg9.webp" alt="Los astronautas frente a una galaxia brillante" loading="lazy">
+                    </div>
                     <p>Que durará lo que dure la eternidad, y se volverán a encontrar, en cada universo y en cada plano de la existencia.</p>
                 </div>
+            </div>
+            <div class="multiscroll-progress" aria-hidden="true">
+                <div class="multiscroll-progress__fill"></div>
             </div>
         </div>
     </section>
 
-    <section id="contador" aria-label="Tiempo juntos">
-        <div class="contador-box">
-            <h2>El tiempo se detuvo hace...</h2>
-            <p id="tiempoJuntos" role="timer" aria-live="polite"></p>
+    <!-- Final Act: The Eternity Timer -->
+    <section id="contador" aria-label="Tiempo juntos" data-theme="eternity">
+        <div class="eternity-monument reveal-on-scroll">
+            <div class="eternity-monument__rings" aria-hidden="true">
+                <div class="eternity-ring eternity-ring--1"></div>
+                <div class="eternity-ring eternity-ring--2"></div>
+            </div>
+            <div class="eternity-monument__header">
+                <span class="eternity-pretitle">Constante cósmica</span>
+                <h2 class="eternity-title">El tiempo se detuvo hace...</h2>
+            </div>
+            <div class="contador-grid" id="tiempoGrid" role="timer" aria-live="polite">
+                <div class="contador-card">
+                    <span class="contador-num" id="diasVal">0</span>
+                    <span class="contador-unit">Días</span>
+                </div>
+                <div class="contador-card">
+                    <span class="contador-num" id="horasVal">00</span>
+                    <span class="contador-unit">Horas</span>
+                </div>
+                <div class="contador-card">
+                    <span class="contador-num" id="minutosVal">00</span>
+                    <span class="contador-unit">Minutos</span>
+                </div>
+                <div class="contador-card">
+                    <span class="contador-num" id="segundosVal">00</span>
+                    <span class="contador-unit">Segundos</span>
+                </div>
+            </div>
+            <div class="eternity-monument__footer">
+                <div class="eternity-orbit-dot" aria-hidden="true"></div>
+                <p class="contador-subtext">Desde aquel 4 de septiembre de 2022, en este y en todos los universos.</p>
+            </div>
         </div>
     </section>
 
