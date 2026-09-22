@@ -15,7 +15,11 @@ body {
     font-family: var(--font-body);
     color: var(--historia-text);
     margin: 0;
+    /* The decorative layers bleed well past their sections. clip stops the page from
+       scrolling sideways without turning the body into a scroll container, which would
+       break the sticky act; hidden is the fallback for browsers without clip. */
     overflow-x: hidden;
+    overflow-x: clip;
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
     position: relative;
@@ -496,6 +500,15 @@ body[data-active-theme="eternity"] {
     max-width: 1200px;
     margin: 0 auto;
     box-sizing: border-box;
+}
+
+/* The decorative canvases are meant to bleed past their section (width 160% / 140%, and
+   120% on mobile, each with a negative inset). base.css clamps every canvas to
+   max-width: 100%, which squashed them onto the section width and pulled them out of
+   alignment with the act-nebula layer they sit on top of. */
+.story-section canvas,
+.parallax-section canvas {
+    max-width: none;
 }
 
 .story-section--reverse {
@@ -1165,6 +1178,16 @@ body[data-active-theme="eternity"] {
 .reveal-on-scroll.is-revealed {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Several decorative layers (space-ambient glows, act-nebula bleeds, the eternity rings)
+   are fixed or absolutely positioned and reach past the viewport — the glows alone reach
+   166px past it. Neither the body's overflow-x nor clipping the ambient wrapper can stop
+   them, which left a real 74px sideways scroll on touch devices. Clipping at the root is
+   what actually covers them; `clip` rather than `hidden` so no scroll container is created
+   and the sticky act keeps working. */
+html {
+    overflow-x: clip;
 }
 
 /* Responsiveness & Mobile Experience Polish */

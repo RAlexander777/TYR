@@ -51,6 +51,16 @@ header {
     position: relative;
 }
 
+/* The exit button is fixed at the top-right: 46px tall, 16px from the top, z-index 950 —
+   always above this header. The title only clears it while it stays narrow enough to be
+   centred away from that corner; once it is wide enough to reach under the button the two
+   collide. Reserve the button's height on the widths where that happens. */
+@media (max-width: 720px) {
+    header {
+        margin-top: 76px;
+    }
+}
+
 h1.glow-text {
     font-family: var(--font-script);
     font-size: clamp(2.4rem, 6vw, 3.5rem);
@@ -181,7 +191,13 @@ canvas.scratch-canvas {
     cursor: grab;
     border-radius: var(--radius-sm);
     transition: opacity 1s ease;
-    touch-action: none;
+    /* pan-y hands vertical drags to the browser: a flick scrolls the page and the canvas
+       is dropped from the gesture (touchcancel) instead of being scratched. Sideways drags
+       stay here, which is exactly what scratching needs. */
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 canvas.scratch-canvas:active {

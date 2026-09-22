@@ -161,7 +161,8 @@ function initScratch(canvas, index) {
 
     function scratch(event) {
         if (!isDrawing || revealed) return;
-        if (event.type.startsWith('touch')) event.preventDefault();
+        // Deliberately no preventDefault on touch: cancelling the event would also cancel
+        // the page pan that touch-action: pan-y allows.
 
         const pos = getMousePos(event);
         ctx.beginPath();
@@ -198,12 +199,40 @@ function initScratch(canvas, index) {
     }
 
     canvas.addEventListener('mousedown', () => { isDrawing = true; });
-    canvas.addEventListener('touchstart', (event) => { isDrawing = true; scratch(event); }, { passive: false });
     canvas.addEventListener('mousemove', scratch);
-    canvas.addEventListener('touchmove', scratch, { passive: false });
     canvas.addEventListener('mouseup', () => { isDrawing = false; });
     canvas.addEventListener('mouseleave', () => { isDrawing = false; });
-    canvas.addEventListener('touchend', () => { isDrawing = false; });
+
+    // Scratch on move, never on touchstart, and only once the opening movement is clearly
+    // sideways. The browser claims vertical gestures for scrolling, but it hands over the
+    // first touchmove before it does, and that one used to paint a mark on every scroll.
+    // Once engaged, scratching works in any direction.
+    let touchOrigin = null;
+    let engaged = false;
+
+    canvas.addEventListener('touchstart', (event) => {
+        const t = event.touches[0];
+        touchOrigin = { x: t.clientX, y: t.clientY };
+        engaged = false;
+        isDrawing = false;
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', (event) => {
+        const t = event.touches[0];
+        if (!engaged) {
+            const dx = Math.abs(t.clientX - touchOrigin.x);
+            const dy = Math.abs(t.clientY - touchOrigin.y);
+            if (dx < 8 && dy < 8) return;
+            if (dy >= dx) return;
+            engaged = true;
+            isDrawing = true;
+        }
+        scratch(event);
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', () => { isDrawing = false; touchOrigin = null; });
+    // Fired when the browser takes the gesture over to scroll the page.
+    canvas.addEventListener('touchcancel', () => { isDrawing = false; touchOrigin = null; });
 }
 
 const container = document.querySelector('#tickets-container');

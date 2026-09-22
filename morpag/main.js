@@ -121,8 +121,8 @@ function splashHearts() {
     heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
     let left = Math.random() * (window.innerWidth - 60);
     let top = Math.random() * (window.innerHeight - 60);
-    const velocityX = (Math.random() - 0.5) * 4;
-    const velocityY = (Math.random() - 0.5) * 4;
+    let velocityX = (Math.random() - 0.5) * 4;
+    let velocityY = (Math.random() - 0.5) * 4;
     heart.style.left = `${left}px`;
     heart.style.top = `${top}px`;
     emojiContainer.appendChild(heart);

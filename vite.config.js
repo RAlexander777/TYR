@@ -4,6 +4,9 @@ import { resolve } from 'node:path'
 export default defineConfig({
   base: './',
   server: {
+    // Bind to the LAN, not just localhost: the phone tests happen over the local Wi-Fi,
+    // and with the default host the phone has nothing to connect to.
+    host: true,
     watch: {
       ignored: ['**/*~tmp*', '**/*.tmp']
     }
